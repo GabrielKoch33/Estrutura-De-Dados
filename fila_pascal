@@ -1,0 +1,94 @@
+Program FILA(output);
+
+type
+    vetor = array [1..5] of integer;
+
+var
+    vet: vetor;
+    op, point: integer;
+
+function cheia(p: integer): boolean;
+begin
+    cheia := p > 5;
+end;
+
+procedure incluir(var v: vetor; var p: integer);
+var valor: integer;
+begin
+    if cheia(p) then
+        writeln('FILA CHEIA')
+    else
+    begin
+        writeln('Digite um valor');
+        readln(valor);
+        v[p] := valor;
+        p := p + 1;
+    end;
+end;
+
+procedure remover(var v: vetor; var p: integer);
+var j: integer;
+begin
+    if p = 1 then
+        writeln('FILA VAZIA')
+    else
+    begin
+        writeln('Removido: ', v[1]);
+
+        for j := 1 to p-1 do
+            v[j] := v[j+1];
+
+        p := p - 1;
+    end;
+end;
+
+procedure consultar(v: vetor; p: integer);
+begin
+    if p = 1 then
+        writeln('FILA VAZIA')
+    else
+        writeln('Primeiro elemento: ', v[1]);
+end;
+
+procedure escrever(v: vetor; p: integer);
+var i: integer;
+begin
+    if p = 1 then
+        writeln('Fila vazia')
+    else
+        for i := 1 to p-1 do
+            writeln(v[i]);
+end;
+
+begin
+    point := 1;
+    op := -1;
+
+    while op <> 0 do
+    begin
+        writeln('---MENU---');
+        writeln('1 - INCLUIR NUM');
+        writeln('2 - REMOVER NUM');
+        writeln('3 - ESCREVER FILA');
+        writeln('4 - CONSULTAR 1o');
+        writeln('5 - VAZIA OU CHEIA');
+        writeln('0 - SAIR');
+
+        readln(op);
+
+        if op = 1 then incluir(vet, point);
+        if op = 2 then remover(vet, point);
+        if op = 3 then escrever(vet, point);
+        if op = 4 then consultar(vet, point);
+
+        if op = 5 then
+        begin
+            if cheia(point) then
+                writeln('Fila cheia')
+            else if point = 1 then
+                writeln('Fila vazia')
+            else
+                writeln('Fila possui elementos');
+        end;
+    end;
+end.
