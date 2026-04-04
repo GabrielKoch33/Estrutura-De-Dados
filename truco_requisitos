@@ -1,0 +1,23 @@
+O jogo de truco é muito tradicional na nossa região. Você deve criar um programa para simular as regras do jogo considerando as regras do jogo e as seguintes observações:
+
+1) As cartas devem ser embaralhadas usando princípio de lista (sem ordenação) e armazenadas numa pilha
+2) O baralho deve ser cortado e as cartas distribuídas usando princípio de fila
+3) Os jogadores recebem 3 cartas e devem ser armazenadas usado novamente o princípio da lista
+
+Além das estruturas (pilha, lista e fila) com descritor o algoritmo deve utilizar métodos que devem estar parametrizados, conforme visto em sala de aula
+Em grupo de no máximo 3 acadêmicos
+
+REGRAS DO TRUCO
+  Participantes: 2  jogadores (computador e você).
+  Baralhos: um baralho espanhol, retirando as cartas 8, 9 e o coringa (joker).
+  Distribuição de cartas: três cartas para cada jogador.
+  Objetivo: fazer 12 pontos.
+
+GLOSSÁRIO DO TRUCO
+  Manilhas: As cartas que valem mais em cada rodada respeitando a sequência de naipes, do maior para o menor: ♣ Paus, ♥ Copas, ♠ Espadas e ♦ Ouros.
+  Vira: A carta que é virada para definir quais serão as manilhas.
+  Rodada: Uma sequência de jogadas, onde cada jogador joga uma carta.
+  Mão: Composta de duas a três rodadas, e vale inicialmente 1 ponto.
+  Pedir Truco (trucar), Seis, Nove ou Doze: Proposta para subir o valor de pontos da mão - pode ser para 3, depois para 6, 9 e finalmente para 12.
+  Mão de 11: Quando uma das duplas está com 11 pontos.
+  Mão de ferro: Quando as duas duplas estão com 11 pontos.
