@@ -1,0 +1,139 @@
+Program Pzim ;
+	type 
+	descritor = record
+			lista_descritor: array [1..5] of string;
+			tam: integer;
+			pointer: integer;
+			divisor: integer
+	end;
+	var
+		vet: descritor;
+    op: integer;
+
+
+function cheia(v: descritor): boolean;
+begin
+    cheia := v.pointer > 5;
+end;
+
+procedure incluir(var v: descritor);
+var
+    nome: string;
+    i: integer;
+begin
+    if cheia(v) then
+        writeln('LISTA CHEIA')
+    else
+    begin
+        writeln('Digite um nome a ser inserido');
+        readln(nome);
+        nome := upcase(nome);
+        if v.pointer = 1 then
+       		begin
+       	 		v.lista_descritor[v.pointer]:= upcase(nome);
+        		v.pointer:= v.pointer + 1;
+       		end      
+				else
+					begin
+       			v.divisor := 1;
+       			while (v.divisor < v.pointer) and (nome > v.lista_descritor[v.divisor]) do
+           			v.divisor := v.divisor + 1;
+           			
+       			for i := v.pointer downto v.divisor+1 do
+           			v.lista_descritor[i] := v.lista_descritor[i-1];
+           			
+       			v.lista_descritor[v.divisor] := nome;
+       			v.pointer:= v.pointer + 1;
+     			end;
+    end;
+end;
+
+procedure remover(v: descritor);
+var i, j: integer;
+nome: string;
+begin
+   if v.pointer = 1 then
+       writeln('FILA VAZIA')
+   else
+   begin
+       writeln('escolha uma nome para remover: ');
+       readln(nome);
+       WRITELN('Removido: ',nome);
+       for i:= 1 to v.pointer-1 do
+        if v.lista_descritor[i] = nome then
+        	begin
+        		for j:= i to p-1 do
+        			v.lista_descritor[j]:= v.lista_descritor[j+1]
+        	end;
+        v.pointer :=  v.pointer - 1;
+   end;
+end;
+
+
+procedure consultar(v: descritor);
+var nome: string;
+i: integer;
+begin
+   if v.pointer = 1 then
+       writeln('FILA VAZIA')
+   else
+   begin
+    writeln('descreva o nome do aluno: ');
+    readln (nome) ;
+       for i:= 1 to v.pointer-1 do
+       begin
+        if upcase(nome) = v.lista_descritor[i] then
+					writeln('O NOME ',v.lista_descritor[i],' ESTÁ NA LISTA');
+       end;
+       
+   end;
+end;
+
+procedure escrever(v: descritor);
+var i: integer;
+begin
+   if v.pointer = 1 then
+       writeln('Fila vazia')
+   else
+    begin
+       for i := 1 to v.pointer-1 do
+           writeln(v.lista_descritor[i]);
+     end;
+end;
+
+
+Begin
+  vet.pointer := 1;
+  op := 100;
+  while op <> 0 do
+  begin
+  writeln('---MENU---');
+        writeln('1 - INCLUIR NOME');
+        writeln('2 - REMOVER NOME');
+        writeln('3 - ESCREVER LISTA DE CHAMADA');
+        writeln('4 - CONSULTAR');{pedir nome}
+        writeln('5 - VAZIA OU CHEIA');
+        writeln('0 - SAIR');
+       
+        readln(op);
+
+        if op = 1 then
+					incluir(vet);
+        if op = 2 then
+					remover(vet);
+        if op = 3 then
+					escrever(vet);
+        if op = 4 then
+					consultar(vet);
+        if op = 5 then
+        begin                          
+            if cheia(vet) then
+                writeln('LISTA CHEIA')
+            else if vet.pointer = 1 then
+                writeln('LISTA VAZIA, PODE INCLUIR')
+            else
+                writeln('LISTA POSSUI ELEMENTOS INSERIDOS!');
+        end;
+
+  end;
+End.
