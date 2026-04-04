@@ -1,0 +1,135 @@
+Program Pzim ;
+	type
+		vetor = array [1..6] of string;
+
+{p = onde está a opção de inserir (p-1 para comparar todos os valores do vetor
+}
+var
+	vet: vetor;
+	point, op: integer;
+
+
+function cheia(p: integer): boolean;
+begin
+    cheia := p > 5;
+end;
+
+procedure incluir(var v: vetor; var p: integer);
+var
+    nome: string;
+    i, split: integer;
+begin
+    if cheia(p) then
+        writeln('LISTA CHEIA')
+    else
+    begin             
+        	writeln('Digite um nome a ser inserido');
+        	readln(nome);
+        	nome := upcase(nome);
+        if p = 1 then
+		       begin
+		        	v[p]:= upcase(nome);
+		        	p:= p + 1;
+		       end      
+				else
+				begin
+       		split := 1;
+       			while (split < p) and (nome > v[split]) do
+          		split := split + 1;
+       					for i := p downto split do
+           				v[i] := v[i-1];
+       			v[split] := nome;
+       			p := p + 1;
+     		end;
+    end;
+end;
+
+procedure remover(var v: vetor; var p: integer);
+var i, j: integer;
+nome: string;
+begin
+   if p = 1 then
+       writeln('FILA VAZIA')
+   else
+   begin
+       writeln('escolha uma nome para remover: ');
+       readln(nome);
+       WRITELN('Removido: ',nome);
+       for i:= 1 to p-1 do
+        if v[i] = nome then
+        	begin
+        		for j:= i to p-1 do
+        			v[j]:= v[j+1]
+        	end;
+        p :=  p - 1;
+   end;
+end;
+
+procedure consultar(v: vetor; p: integer);
+var nome: string;
+i: integer;
+begin
+   if p = 1 then
+       writeln('FILA VAZIA')
+   else
+		   begin
+		    writeln('descreva o nome do aluno: ');
+		    readln (nome) ;
+		       for i:= 1 to p do
+		       begin
+		        if upcase(nome) = v[i] then
+							writeln('O NOME ',v[i],' ESTÁ NA LISTA');
+		       end;
+		       
+		    end;
+end;
+
+procedure escrever(v: vetor; p: integer);
+var i: integer;
+begin
+   if p = 1 then
+       writeln('Fila vazia')
+   else
+    begin
+       for i := 1 to p-1 do
+           writeln(v[i]);
+     end;
+end;
+
+
+Begin
+  point := 1;
+  op := 100;
+  while op <> 0 do
+  begin
+  writeln('---MENU---');
+        writeln('1 - INCLUIR NOME');
+        writeln('2 - REMOVER NOME');
+        writeln('3 - ESCREVER LISTA DE CHAMADA');
+        writeln('4 - CONSULTAR');{pedir nome}
+        writeln('5 - VAZIA OU CHEIA');
+        writeln('0 - SAIR');
+       
+        readln(op);
+
+        if op = 1 then
+incluir(vet, point);
+        if op = 2 then
+remover(vet, point);
+        if op = 3 then
+escrever(vet, point);
+        if op = 4 then
+consultar(vet, point);
+
+        if op = 5 then
+        begin
+            if cheia(point) then
+                writeln('LISTA CHEIA')
+            else if point = 1 then
+                writeln('LISTA VAZIA, PODE INCLUIR')
+            else
+                writeln('LISTA POSSUI ELEMENTOS INSERIDOS!');
+        end;
+
+  end;
+End.
