@@ -20,7 +20,6 @@ Program truco;
 		jogo = record
 			player_computador: computador;
 			player_jogador: pessoa;
-			molde_cartas: cartas; 
 			baralho: array [1..40] of cartas;
 			aux: cartas;
 			start: integer;
@@ -30,7 +29,6 @@ Program truco;
 			
 		var
 		desc_jogo: jogo;
-		k: integer;
 		
 		procedure popular_baralho(var dc_jogo: jogo);
 		var i, naipe, numero: integer;
@@ -150,8 +148,8 @@ Begin
     writeln('------------------------------------');
     writeln('Quem vai embaralhar?');
 		writeln('[1] = Computador | [2] = Player');
-		embaralhar(desc_jogo);
-   	readln(desc_jogo.start)//start vai ajudar a definir o fluxo das rodadas e cortes
+	embaralhar(desc_jogo);
+   		readln(desc_jogo.start)//start vai ajudar a definir o fluxo das rodadas e cortes
     corte_baralho(desc_jogo);
     distribui_cartas(desc_jogo);
 End.
