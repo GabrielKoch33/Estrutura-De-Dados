@@ -22,9 +22,10 @@ Program truco;
 			player_jogador: pessoa;
 			molde_cartas: cartas; 
 			baralho: array [1..40] of cartas;
-			baralho_cortado: 	
 			aux: cartas;
-			start: boolean;
+			start: integer;
+			corte: integer;
+			distribuidor: integer;
 		end;
 			
 		var
@@ -45,16 +46,17 @@ Program truco;
 					numero := 11
 				else if numero =10 then
 					numero := 12;
-				  // ao invÈs de pular o 8 e 9, preenche de os valores numericos e dps substitui
+				  // ao inv√©s de pular o 8 e 9, preenche de os valores numericos e dps substitui
 				  
 				dc_jogo.baralho[i].naipe_peso := naipe;
 				dc_jogo.baralho[i].numero_carta := numero;
 			end;
+		end;
 			
 		procedure embaralhar( var dc_jogo: jogo);
 		var i, random1, random2: integer; 
 		begin
-		 for i:= 1 to 100 do//permite diversas combinaÁıes
+		 for i:= 1 to 100 do//permite diversas combina√ß√µes
 			 begin
 		 		random1:= random(40)+1;
 		 		random2:= random(40)+1;
@@ -76,29 +78,95 @@ Program truco;
 		   	end;
 		end;  
 		
-		function corte_baralho(dc_jogo: jogo): 		   
+		procedure corte_baralho(var dc_jogo: jogo);
+		var i: integer;		   
+		begin
+			if dc_jogo.start = 1 then   //corte: = indice random + 1;
+			begin			 
+				 dc_jogo.corte:= random(32)+1;//1 √© o m√≠nimo; 33 √© m√°ximo. ex: corte na posi√ß√£o 32, as posi√ß√µes 33 para frente v√£o ser usadas para distruibuir e 'vira'
+			   dc_jogo.corte:= dc_jogo.corte+ 1;
+			end
+			else 
+			begin
+				 writeln('Qual a posi√ß√£o de corte?');
+				 readln(dc_jogo.corte);
+				 dc_jogo.corte:= dc_jogo.corte + 1;
+				 if dc_jogo.corte < 1 or dc_jogo.corte > 33 then
+				 repeat
+				 begin
+						writeln('Corte Inv√°lido, tente novamente: ');
+						readln(dc_jogo.corte);
+						dc_jogo.corte:= dc_jogo.corte + 1;
+				 end;
+				 until dc_jogo.corte > 1 and dc_jogo.corte <= 33;
+			end;									 
+		end;
+		
+		procedure distribui_cartas(var dc_jogo: jogo);
+		var  i, contador_de_cartas, receba: integer;
+		begin
+				if dc_jogo.start = 1 then receba := 1;//se comp come√ßa, ent player recebe primeiro	
+				if dc_jogo.start = 2 then receba := 2;//se player come√ßa, ent comp recebe primeiro
+		  contador_de_cartas:= 0;
+		  if receba = 1 then
+			begin
+			for dc_jogo.[corte] to dc_jogo.[corte+5] do
+				begin
+         	if contador_de_cartas mod 2 = 0 then
+         	begin
+         		dc_jogo.jogador_player.mao_player[contador_de_cartas div 2 + 1] := dc_jogo.baralho[corte];
+         		contador_de_cartas := contador_de_cartas + 1;
+         	end
+         	else if contador_de_cartas mod 2 = 1 then
+         	begin
+         		dc_jogo.jogador_computador.mao_computador[contador_de_cartas div 2 + 1] := dc_jogo.baralho[corte];
+         		contador_de_cartas := contador_de_cartas + 1;
+         	end;
+				end;
+			end;
+		
+			if receba = 2 then
+			begin
+				for dc_jogo.corte to dc_jogo.corte+5 do
+					begin
+	         	contador_de_cartas:= 0;
+	         	if contador_de_cartas mod 2 = 0 then
+	         	begin
+	         		dc_jogo.jogador_computador.mao_computador[contador_de_cartas div 2 + 1] := dc_jogo.[corte];
+	         	end
+	         	else if contador_de_cartas mod 2 = 1 then
+	         	begin
+	         		dc_jogo.jogador_player.mao_player[contador_de_cartas div 2 + 1] := dc_jogo.[corte];
+	         	end;
+					end;
+			end;			
+		end;
 		
 Begin
+		//quem embaralha, distribui tbm
+		//quem corta, lan√ßa primeiro
+	{while desc_jogo.player_computador.pontos_computador < 11 OR desc_jogo.player_jogador.pontos_player < 11 do}
     popular_baralho(desc_jogo);
     writeln('------------------------------------');
     writeln('Quem vai embaralhar?');
-		writeln('[0] = Computador | [1] = Player');
-    readln(desc_jogo.start)//start vai ajudar a definir o fluxo das rodadas e cortes
-    			embaralhar (desc_jogo);//independente de quem for o embaralhamento ocorre
-    baralho_cortado:= corte_baralho(desc_jogo);
-    {A fazer:
-		 Quem n„o embaralhou È quem corta
-		 Se computador corta ? random define o Ìndice
-		 Se player corta ? readln com validaÁ„o
+		writeln('[1] = Computador | [2] = Player');
+		embaralhar(desc_jogo);
+   	readln(desc_jogo.start)//start vai ajudar a definir o fluxo das rodadas e cortes
+    corte_baralho(desc_jogo);
+    distribui_cartas(desc_jogo);
+End.
+
+  {A fazer:
+		 Quem n√£o embaralhou √© quem corta
+		 Se computador corta ? random define o √≠ndice
+		 Se player corta ? readln com valida√ß√£o
 		 Range do corte: >= 2 e <= 33
-		 Guardar o Ìndice do corte no desc_jogo
+		 Guardar o √≠ndice do corte no desc_jogo
 		 Quem embaralhou distribui
-		 DistribuiÁ„o comeÁa em corte + 1 (princÌpio de fila)
-		 Manter marcador de posiÁ„o (ponteiro de inÌcio da fila)
+		 Distribui√ß√£o come√ßa em corte + 1 (princ√≠pio de fila)
+		 Manter marcador de posi√ß√£o (ponteiro de in√≠cio da fila)
 		 Distribuir intermitentemente: player ? comp ? player ? comp ? player ? comp
-		 Contador de cartas dadas para atÈ 6
-		 baralho[corte + 7] ? vira (primeira carta apÛs as 6 distribuÌdas)
+		 Contador de cartas dadas para at√© 6
+		 baralho[corte + 7] ? vira (primeira carta ap√≥s as 6 distribu√≠das)
 		}
     
-
-End.
