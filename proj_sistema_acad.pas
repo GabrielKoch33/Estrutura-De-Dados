@@ -1,104 +1,131 @@
 Program Pzim ;     //sistema escolar
 
 	CONST weeklyClass = 15;
-	CONST tot_notas = 6;
-	{m·ximo de 15 aulas por semana
-	teve que ser declarado const pois o weekly È variavel, mas antes de deixar o user definir,
-	È preciso declarar um valor}
-	type 
+	CONST tot_notas = 10;
+	{m√°ximo de 15 aulas por semana
+	teve que ser declarado const pois o weekly √© variavel, mas antes de deixar o user definir,
+	√© preciso declarar um valor}
+	type
 		mat_nota = record
-			disciplina: string;
-			nota: array [1..tot_notas] of real;
-			peso: array [1..tot_notas] of real;
-		end;
+		disciplina: string;
+		nota: array [1..tot_notas] of real; {max 10  notas }
+		peso: array [1..tot_notas] of real; {max 10 notas }  
+		qtdNotasPorMat: integer;
+		somaDosPesos: real;
+		media: real;
+	end;
 		
-	{	sist_acad = record
-			 lista: array [1..weeklyClass] of mat_nota//cada [i] possui o nome de uma disciplina e um campo de x notas
-		end; //TUDO ser· inserido nesse vetor
-	}
-		sistema = record
-			ListaDiscNota: array [1..weeklyClass] of mat_nota//cada [i] possui o nome de uma disciplina e um campo de x notas //TUDO ser· inserido nesse vetor ;
-			PesoNotas: real;
-			pointer_materia: integer;
-			qtd_notas: integer;
-			qtd_mat: integer;
-			limite: string;
-		end;
+	sistema = record
+		ListaDiscNota: array [1..weeklyClass] of mat_nota;//cada [i] possui o nome de uma disciplina e um campo de x notas //TUDO ser√° inserido nesse vetor ;
+		PesoNotas: real;
+		pointer_materia: integer;
+		pointer_nota: integer;
+		pointer_peso: integer;
+		qtd_notas: integer;   //inutil?
+		qtd_mat: integer;
+		media_instituicao: real;
+		limite: string;
+	end;
 		
-		var
-			desc: sistema;
-			op: integer;
-			nome: string;
+var
+		desc: sistema;
+		op: integer;
+		nome: string;
 			
-		
-		procedure cadastrar_disciplina(var dc: sistema);
-			var i: integer; inserir: string;
-		begin
-			
-				if dc.pointer_materia > dc.qtd_mat then
-					begin
-					  writeln('LIMITES DE MAT…RIAS CADASTRADAS ALCAN«ADAS, DESEJA AUMENTAR O LIMITE DE CADASTROS? DIGITE "SIM" OU "N√O"');
-					  readln(dc.limite);
-					  if upcase(dc.limite) = 'SIM' then
-					  begin
-					  	dc.qtd_mat:= dc.qtd_mat + 1;
-							dc.pointer_materia:= dc.pointer_materia + 1; 
-					  end;
-					end
-				else 
-					begin
-					  writeln('Qual o nome da ',dc.pointer_materia,'™ matÈria?');
-						readln(inserir);
-						dc.ListaDiscNota[dc.pointer_materia].disciplina:= inserir;
-						dc.pointer_materia := dc.pointer_materia + 1;
-          end;
-		end;
-			
-		procedure cadastrar_nota(var dc: sistema);
-		 	var i: integer; inserir: string;
-		Begin
-		      writeln('VocÍ quer cadastrar a nota de qual disciplina?');
+procedure cadastrar_disciplina(var dc: sistema);
+	var i: integer; inserir: string;
+begin                                                                                       
+		if dc.pointer_materia > dc.qtd_mat then
+			begin
+					writeln('LIMITES DE MAT√âRIAS CADASTRADAS ALCAN√áADAS, DESEJA AUMENTAR O LIMITE DE CADASTROS? DIGITE "SIM" OU "N√ÉO"');
+			  	readln(dc.limite);
+			  	if upcase(dc.limite) = 'SIM' then
+						dc.qtd_mat:= dc.qtd_mat + 1;  
+			end
+		else 
+			begin
+				  writeln('Qual o nome da ',dc.pointer_materia,'¬™ mat√©ria?');
 					readln(inserir);
-					for i:= 1 to qtd_mat do
-						begin
-						    if //inserir = a [i] then adiciona nota e soma pesos
-						end;      
-		end;
+					dc.ListaDiscNota[dc.pointer_materia].disciplina:= upcase(inserir);
+					dc.pointer_materia := dc.pointer_materia + 1; //define o indice que ser√° incluido uma mat√©ria nova, at√© um limite definido pelo user
+					dc.ListaDiscNota[dc.pointer_materia].qtdNotasPorMat := 0; 
+      end;
+end;
 		
-		function relatorio(dc:sistema):string;
+procedure cadastrar_nota(var dc: sistema);
+	 	var i,j: integer; inserir,continuar: string;
+Begin
+		Writeln('LEMBRETE: PERMITIDO CADASTRAR/PUBLICAR NO M√ÅXIMO AT√â 10 NOTAS POR MAT√âRIA!!!');
+		writeln('Voc√™ quer cadastrar a nota de qual disciplina?');
+		readln(inserir);
+		for i:= 1 to dc.qtd_mat do  //percorre todas as mat√©rias cadastradas at√© achar uma posi√ß√£o em que disciplina = inserir                      
 		begin
-			  
-		end;
+				if upcase(inserir) = dc.ListaDiscNota[i].disciplina then
+					 begin   
+							 j:= dc.ListaDiscNota[i].qtdNotasPorMat;  
+					   	 while (j <= 10) and (continuar = 'SIM') do
+					     begin
+							  	writeln('Informe a ',j,'¬™ Nota e seu respectivo Peso: ');
+							  	readln (dc.ListaDiscNota[i].nota[j]);
+									readln (dc.ListaDiscNota[i].peso[j]); 
+									dc.ListaDiscNota[i].qtdNotasPorMat := dc.ListaDiscNota[i].qtdNotasPorMat + 1;
+									writeln('Deseja continuar inserindo notas?');
+									readln(continuar);
+										if upcase(continuar) = 'SIM' then 
+											j:= j + 1;
+							end;		
+				  end;		
+		end;      
+end;
 		
-		procedure remover_disc(var dc:sistema);
-		var i: integer; inserir: string;
+function relatorio(dc:sistema):integer;
+var i: integer;
+begin
+	Writeln(' RELAT√ìRIO NOTAS CADASTRADAS... ');
+	Writeln(' | MAT√âRIA | NOTA ( PESO ) | M√âDIA ATUAL | M√âDIA FALTANTE | ');
+	for i:= 1 to dc.pointer_materia-1 do
 		begin
-		      writeln('nn');
+			writeln('| ',dc.ListaDiscMat[i].disciplina);
+			for j:= 1 to 
 		end;
+end;
+	
+	
+	
+	
 		
-		procedure remover_nota(var dc:sistema);
-		var i: integer; inserir: string;			
-		begin
-		     writeln('nn');
-		end;
+{procedure remover_disc(var dc:sistema);
+	var i: integer; inserir: string;
+begin	      
+	writeln('nn');
+end;
+
+procedure remover_nota(var dc:sistema);
+	var i: integer; inserir: string;			
+begin
+  writeln('nn');
+end;
 		
-		
+		        }
 Begin
   op:= 10;
   desc.pointer_materia:= 1;
   desc.qtd_notas:=1;
-  writeln('Ol·, qual seu nome?');
+  writeln('Ol√°, qual seu nome?');
   readln(nome);
-  writeln('Quantas matÈrias v„o ser cadastradas?');
-  readln(desc.qtd_mat);{todos os for v„o ser percorridos atÈ essa dist‚ncia}
-  writeln('BEM VINDO, ',upcase(nome),' AO SISTEMA DE GERENCIAMENTO DE NOTAS ACAD MICAS');
+  writeln('Quantas mat√©rias v√£o ser cadastradas?');
+  readln(desc.qtd_mat);{todos os for v√£o ser percorridos at√© essa dist√¢ncia} {qtd_mat substitui weeklyclass}
+  writeln('Qual a m√©dia da Institui√ß√£o? ');
+  readln(desc.media_instituicao);
+  writeln('BEM VINDO, ',upcase(nome),' AO SISTEMA DE GERENCIAMENTO DE NOTAS ACAD√äMICAS');
+  
   while op <> 0 do
   begin
   	   writeln('/// PROGRAMA INICIALIZADO...MENU: \\\');
   	   WRITELN('1 - CADASTRAR DISCIPLINA');               
   	   WRITELN('2 - CADASTRAR NOTA DA DISCIPLINA');
-  	   WRITELN('3 - CONSULTAR RELAT”RIO | DISCIPLINA | NOTA |');
-  	   WRITELN('4 - REMOVER/ALTERAR DISCIPLINA DISCIPLINA');
+  	   WRITELN('3 - CONSULTAR RELAT√ìRIO | DISCIPLINA | NOTA | PESO |');
+  	   WRITELN('4 - REMOVER/ALTERAR DISCIPLINA ');
   	   WRITELN('5 - REMOVER/ALTERAR NOTA');
   	   WRITELN('0 - SAIR');
   	   writeln('Qual a pedida meu consagrado?');
@@ -107,16 +134,13 @@ Begin
   	  		cadastrar_disciplina(desc);
 			 if op = 2 then
 			 		cadastrar_nota(desc);
-			 if op = 3 then
+			{ if op = 3 then
 					relatorio(desc);
 			 if op = 4 then
 			 		remover_disciplina(desc);
 			 if op = 5 then
-			 		remover_nota(desc);  
+			 		remover_nota(desc);}  
 			 if op = 0 then
-			 		break
-			 else
-			 		writeln('OP«√O INV¡LIDA, TENTE NOVAMENTE'); 
+			 		break;
   end;
-  
 End.
