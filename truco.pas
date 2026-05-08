@@ -328,7 +328,7 @@ Program Pzim ;
 						   
 		procedure reagir(var ref_objeto_jogo: treg_jogo); // Reação que o jogador e o computador tomam ao truco
 			var valor: integer;
-			begin
+			begin     // REACAO É A TOMADA DE DECISÃO DO JOGADOR Á ESCOLHA DO ADVERSÁRIO
 			  repeat
 			  if ref_objeto_jogo.pontuacaoTrucado <> 12 then
 			  	begin
@@ -389,7 +389,7 @@ Program Pzim ;
 							end;
 						ref_objeto_jogo.correu:= true;
 					end	
-				else  // A vez da reação só pode mudar nesse else, quando o valor do truco é aumentado
+				else  // A vez da reação só pode mudar nesse else, quando o valor do truco é aumentado  VALOR = 3
 					begin
 						ref_objeto_jogo.pontuacaoTrucado:= ref_objeto_jogo.pontuacaoTrucado+3;
 						if ref_objeto_jogo.vezReacao = true then
@@ -406,11 +406,11 @@ Program Pzim ;
 		procedure decisao(var ref_objeto_jogo: treg_jogo); // Decisão que o jogador e o computador tomam
 			var valor: integer;
 			begin
-				if (ref_objeto_jogo.trucado = false) or (ref_objeto_jogo.maoDe11 = true) then
+				if (ref_objeto_jogo.trucado = false) or (ref_objeto_jogo.maoDe11 = true) then  //SE N ESTIVER TRUCADO OU UM JOGADOR ESTIVE COM 11
 					begin
-						if ref_objeto_jogo.vez = true then
+						if ref_objeto_jogo.vez = true then   //E FOR A VEZ DO JOGADOR
 							begin
-								if (ref_objeto_jogo.pontuacaoJogador <> 11) and (ref_objeto_jogo.pontuacaoComputador <> 11) then
+								if (ref_objeto_jogo.pontuacaoJogador <> 11) and (ref_objeto_jogo.pontuacaoComputador <> 11) then  //SE AMBOS OS PLAYERS ESTIVEREM COM MENOS DE 11 PTS
 									begin
 										repeat
 											writeln('O que você deseja fazer: [1] Jogar carta, [2] Trucar');
@@ -418,7 +418,7 @@ Program Pzim ;
 											writeln('---------------------------------------------------------------------------------------------------------------------');  
 										until (valor > 0) and (valor < 3);
 									end
-								else 
+								else   // SE UM DELES ESTIVER COM 11 ENTÃO VOCÊ NÃO PODE MAIS TRUCAR, APENAS JOGAR NORMAL
 									begin
 										ref_objeto_jogo.maoDe11:= true;
 										ref_objeto_jogo.pontuacaoTrucado:= 3;																
@@ -429,7 +429,7 @@ Program Pzim ;
 										until (valor > 0) and (valor < 2);	
 									end
 							end
-						else
+						else      // SE FOR A VEZ DO PC ISSO ACONTECE
 							if (ref_objeto_jogo.pontuacaoComputador <> 11) and (ref_objeto_jogo.pontuacaoJogador <> 11) then
 								valor:= random(2)+1
 							else
@@ -439,10 +439,10 @@ Program Pzim ;
 									valor:= 1;
 								end;
 					end
-				else
+				else         // SE JA ESTIVER TRUCADO ESSE BLOCO OCORRE   
 					begin                                
 		      	if ref_objeto_jogo.vez = true then
-							begin
+							begin                   // VEZ REAÇÃO É O OPOSTO DA VEZ DO JOGADOR, SE EU JOGUEI A CARTA A VEZ DE REAGIR PASSA PARA O PC
 								if (ref_objeto_jogo.vezReacao = true) and (ref_objeto_jogo.pontuacaoTrucado <> 12) then
 									begin
 										repeat
@@ -475,7 +475,7 @@ Program Pzim ;
 				
 				// Tratamento da decisão
 				if valor = 1 then
-					begin
+					begin     //bloco ocorre quando se opta não trucar ou quando a pontuação trucado ja estiver 12
 						jogarCarta(objetoCartasJogador, objetoCartasComputador, objetoJogo);
 						objetoJogo.quantidadeCartasJogadas:= objetoJogo.quantidadeCartasJogadas+1;
 						objetoJogo.vez:= not objetoJogo.vez; // Inverte para a vez ser do próximo
@@ -501,11 +501,11 @@ Program Pzim ;
 			
 			
 			procedure decidePonto(var ref_objeto_jogo: treg_jogo);
-				begin
+				begin          // CASO OS JOGADORES LANCEM CARTAS IGUAIS VAI HAVER A CHECAGEEM PARA VER SE É CORINGA
 					if ref_objeto_jogo.cartaJogador.numero = ref_objeto_jogo.cartaComputador.numero then
 						begin
 							if ref_objeto_jogo.cartaJogador.peso<1000 then // Se é menor que 1000, não são coringas
-								begin
+								begin        // SE FOR (<1000) O PONTO FICA EM A VER
 									ref_objeto_jogo.contadorEmpachado:= ref_objeto_jogo.contadorEmpachado+1;
 									writeln('A rodada empachou!');
 									writeln('---------------------------------------------------------------------------------------------------------------------');  
@@ -521,7 +521,7 @@ Program Pzim ;
 											writeln('O jogador pontuou!');
 											writeln('---------------------------------------------------------------------------------------------------------------------');   
 										end
-									else
+									else           // QUEM TEM A CARTA MAIS FORTE PONTUA
 										begin
 											if ref_objeto_jogo.contadorEmpachado <> 0 then
 												ref_objeto_jogo.pontuacaoComputadorMao:= ref_objeto_jogo.pontuacaoComputadorMao+1+ref_objeto_jogo.contadorEmpachado
@@ -533,9 +533,9 @@ Program Pzim ;
 								end
 						end
 					else
-						begin
+						begin                   // COMPARAÇÃO QUANDO NÃO SÃO CARTAS IGUAIS
 							if ref_objeto_jogo.cartaJogador.peso > ref_objeto_jogo.cartaComputador.peso then
-								begin
+								begin                   
 									if ref_objeto_jogo.contadorEmpachado <> 0 then
 										ref_objeto_jogo.pontuacaoJogadorMao:= ref_objeto_jogo.pontuacaoJogadorMao+1+ref_objeto_jogo.contadorEmpachado
 									else
@@ -556,7 +556,7 @@ Program Pzim ;
 				end;
 				
 			procedure decidePontuacao(var ref_objeto_jogo: treg_jogo); // Decide a pontuaÃ§Ã£o da mão
-				begin
+				begin           // SE UM JOGADOR FIZER PELO MENOS 2 PONTOS NA RODADA, então ELE GANHA UM PONTO NA PARTIDA
 					if ref_objeto_jogo.pontuacaoTrucado = 0 then
 						begin
 							if ref_objeto_jogo.pontuacaoJogadorMao > 1 then
@@ -564,7 +564,7 @@ Program Pzim ;
 									ref_objeto_jogo.pontuacaoJogador:= ref_objeto_jogo.pontuacaoJogador+1;
 									writeln('O jogador fez 1 ponto nessa mão!')
 								end
-							else
+							else        // ENTREGA DE PONTOS CASO NÃO ESTEJA COM EFEITOS DE TRUCO
 								begin
 									if ref_objeto_jogo.pontuacaoComputadorMao > 1 then
 										begin
@@ -574,7 +574,7 @@ Program Pzim ;
 									else
 										writeln('As três rodadas empacharam, essa mão empatou');
 								end;
-						end
+						end         // AQUI CASO O JOGO ESTEJA SOBRE EFEITOS DO TRUCO
 					else
 						begin
 							if ref_objeto_jogo.pontuacaoJogadorMao > 1 then
@@ -645,13 +645,13 @@ Begin
 	writeln('O jogo vai começar!');
 	writeln('---------------------------------------------------------------------------------------------------------------------');     
 	writeln('Informe quem irá embaralhar? [1] jogador, [2] computador');
-	readln(objetoJogo.embaralhamento);  
+	readln(objetoJogo.embaralhamento);1'
 	
 	writeln('---------------------------------------------------------------------------------------------------------------------');  
 	repeat                    
 		embaralhar(objetoBaralho, objetoPilhaBaralho);
 		if (objetoJogo.pontuacaoJogador = 11) xor (objetoJogo.pontuacaoComputador = 11) then // OU EXCLUSIVO
-			writeln('MÃO DE 11!');// Será mão de 11 caso APENAS UM, e SOMENTE UM dos jogadores tenha pontuação 11
+			writeln('MÃO DE 11!');
 		if (objetoJogo.pontuacaoJogador = 11) and (objetoJogo.pontuacaoComputador = 11) then
 			writeln('MÃO DE FERRO!');
 		cortar(objetoPilhaBaralho, objetoFilaBaralhoCortado, objetoJogo);
@@ -659,8 +659,8 @@ Begin
 		trataManilha(objetoFilaBaralhoCortado);
 		darAsCartas(objetoCartasJogador, objetoCartasComputador, objetoFilaBaralhoCortado, objetoJogo);
 		
-	  objetoJogo.pontuacaoJogadorMao:= 0;  //se for 2 ja considera vitoria 
-		objetoJogo.pontuacaoComputadorMao:= 0;      //idem
+	  objetoJogo.pontuacaoJogadorMao:= 0;
+		objetoJogo.pontuacaoComputadorMao:= 0;
 		objetoJogo.quantidadeCartasJogadas:= 0;
 		objetoJogo.contadorEmpachado:= 0;
 		objetoJogo.numeroCartasJogador:= 3;
@@ -675,7 +675,6 @@ Begin
 			objetoJogo.vez:= true // Se o computador embaralhou e deu as cartas, o jogador que joga a primeira vez
 		else                                                                    
 			objetoJogo.vez:= false;
-			
 		objetoJogo.trucado:= false;
 		objetoJogo.pontuacaoTrucado:= 0;
 		objetoJogo.correu:= false;
@@ -714,5 +713,6 @@ Begin
 			writeln('PLACAR FINAL:');
 			writeln('Jogador ',objetoJogo.pontuacaoJogador,' X 12 Computador');
 			writeln('---------------------------------------------------------------------------------------------------------------------');
-		end;       
+		end;
+		       
 End.
