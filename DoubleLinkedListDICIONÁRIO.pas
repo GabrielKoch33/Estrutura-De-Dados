@@ -30,7 +30,7 @@ var
 	 descritor: programa;
 
 ////////////////////////////////////////////////////////////	
-procedure limpa_tela();
+function limpa_tela();
 begin
 	clrscr;
 end;	 
@@ -108,7 +108,7 @@ begin
 	 									 ref_descritor.adicionado := True; //em um caso muito específico onde a palavra inserida é entre a ultima e penúltima, ocorre um bug que a palavra é adicionada aqui e no if de baixo, substituindo a ultima palavra 
 										 readkey;
 										 limpa_tela();
-							   		 break;// se quiser tirar esse break só faz uma flag de true/false no while
+							   		 //break;// se quiser tirar esse break só faz uma flag de true/false no while
 							   end
 							   else // caso não encontre uma posição intermediária para inserir, então aux += aux
 							   		aux:= aux^.proximo;
