@@ -14,6 +14,7 @@ Program dicionarioBastos ;
     		end;
 							
 	  dicionario = record
+	  		ant_dicionario: ptDict;
     		verbete_PTBR: tipo_inf;
     		verbete_ING: tipo_inf;
     		prox_dicionario: ptDict;
@@ -21,16 +22,19 @@ Program dicionarioBastos ;
     
 	  programa = record
 		 		opcao: integer;
-		 		palavra: tipo_inf;
+		 		palavra_chave: tipo_inf;  // palavra que o usuário vai informar, serve tanto para palavra chaves como verbetes
+		 		palavra_ingles: tipo_inf;
+		 		palavra_portugues: tipo_inf;
 		 		ListaPalavrasChaves: ptLista;//ponteiro principal da lista
 		 		adicionado : boolean;
+		 		duplicada : boolean;
 		 		end;
 		 
 var
 	 descritor: programa;
 
 ////////////////////////////////////////////////////////////	
-function limpa_tela();
+procedure limpa_tela();
 begin
 	clrscr;
 end;	 
@@ -40,20 +44,30 @@ begin
 		 ref_descritor.ListaPalavrasChaves:= nil;
 end;
 ////////////////////////////////////////////////////////////
-procedure ler_palavra(var ref_descritor: programa);
+procedure ler_palavra_chave(var ref_descritor: programa);
 begin
-    writeln('digite uma PALAVRA-CHAVE: ');
-    readln(ref_descritor.palavra);
-    ref_descritor.palavra := upcase(ref_descritor.palavra);
+    writeln('Digite uma Palavra-Chave: ');
+    readln(ref_descritor.palavra_chave);
+    ref_descritor.palavra_chave := upcase(ref_descritor.palavra_chave);
+end;
+
+procedure ler_palavras_pt_ing (var ref_descritor: programa);
+begin
+		writeln('Digite a Palavra em Português: ');
+		readln(ref_descritor.palavra_portugues);
+		ref_descritor.palavra_portugues := upcase(ref_descritor.palavra_portugues);
+		writeln('Digite a Palavra em Inglês: ');
+		readln(ref_descritor.palavra_ingles);
+		ref_descritor.palavra_ingles := upcase(ref_descritor.palavra_ingles);
 end;
 ////////////////////////////////////////////////////////////
-function escrever_tudo(ref_descritor);
+{function escrever_tudo(ref_descritor);
 begin
-end
+end;}
 ////////////////////////////////////////////////////////////
-function buscar_traducao(ref_descritor);
-begin
-end
+{function buscar_traducao(ref_descritor);
+begin                                   
+end                                     }
 ////////////////////////////////////////////////////////////
 procedure incluir_palavra_chave(var ref_descritor: programa);
 var node,aux,aux2: ptLista;
@@ -67,7 +81,7 @@ begin
 			if ref_descritor.ListaPalavrasChaves = nil then // se for a primeira palavra-chave a ser incluida
 				begin
  					node^.anterior := nil;
-					node^.palavra_chave := ref_descritor.palavra;
+					node^.palavra_chave := ref_descritor.palavra_chave;
 					node^.ponteiro_dict:= nil;
 					node^.proximo:= nil;
 					ref_descritor.ListaPalavrasChaves:= node;
@@ -77,10 +91,10 @@ begin
 				end                                
 			else
 				begin
-					if ref_descritor.palavra < ref_descritor.ListaPalavrasChaves^.palavra_chave then // Esse IF verifica se a palavra a ser incluida é a menor de todas, até mesmo que a 1ª da lista
+					if ref_descritor.palavra_chave < ref_descritor.ListaPalavrasChaves^.palavra_chave then // Esse IF verifica se a palavra a ser incluida é a menor de todas, até mesmo que a 1ª da lista
 					begin 	
-						node^.anterior := nil;
-						node^.palavra_chave := ref_descritor.palavra;
+						node^.anterior := nil;         
+						node^.palavra_chave := ref_descritor.palavra_chave;
 						node^.ponteiro_dict:= nil;
 						node^.proximo:= ref_descritor.ListaPalavrasChaves;
 						ref_descritor.ListaPalavrasChaves^.anterior := node;
@@ -90,40 +104,39 @@ begin
 						limpa_tela()
 					end
 					else // agora é onde iremos perocorrer os nós até achar uma posição que se encaixe
-					begin
-					  aux:= ref_descritor.ListaPalavrasChaves; // o papel de aux será armazenar o endereço do nó ANTERIOR a nova inserção
-					  aux2:= ref_descritor.ListaPalavrasChaves; // o papel de aux2 é armazenar o endereço do nó POSTERIOR a nova inserção
-						while (aux^.palavra_chave < ref_descritor.palavra) and (aux2^.proximo <> nil) do
 						begin
-							   aux2:= aux2^.proximo;//antes de parar o while, e caso a posição que será inserida for a última, então aux2 parará no último nó criado, tornando false a condição do while e saindo do loop
-							   if aux2^.palavra_chave >= ref_descritor.palavra then // se a palavra que aux2 estiver apontado for maior que a inserção, então aux1 ainda estará na anterior a essa, permitindo a conexão
-							   begin
-							   		 node^.anterior := aux;
-							   		 node^.palavra_chave:=ref_descritor.palavra;
-							   		 node^.ponteiro_dict:= nil;
-							   		 node^.proximo:= aux2;
-							   		 aux2^.anterior:= node;
-							   		 aux^.proximo:=node;
-							   		 writeln('Palavra: "',node^.palavra_chave,'" adicionada!');
-	 									 ref_descritor.adicionado := True; //em um caso muito específico onde a palavra inserida é entre a ultima e penúltima, ocorre um bug que a palavra é adicionada aqui e no if de baixo, substituindo a ultima palavra 
-										 readkey;
-										 limpa_tela();
-							   		 //break;// se quiser tirar esse break só faz uma flag de true/false no while
-							   end
-							   else // caso não encontre uma posição intermediária para inserir, então aux += aux
-							   		aux:= aux^.proximo;
-						end;
-						if (aux2^.proximo = nil) and (not ref_descritor.adicionado) then// caso aux2 pare na última posição: node é 'populado' e ligado a lista como sendo o ultimo
-						begin
-							node^.anterior := aux2;
-							node^.palavra_chave := ref_descritor.palavra;
-							node^.ponteiro_dict:= nil;                                        
-							node^.proximo:=nil;
-							aux2^.proximo:= node;
-							writeln('Palavra: "',node^.palavra_chave,'" adicionada!'); 
-							readkey;
-							limpa_tela();
-						end
+						  aux:= ref_descritor.ListaPalavrasChaves; // o papel de aux será armazenar o endereço do nó ANTERIOR a nova inserção
+						  aux2:= ref_descritor.ListaPalavrasChaves; // o papel de aux2 é armazenar o endereço do nó POSTERIOR a nova inserção
+							while (aux^.palavra_chave < ref_descritor.palavra_chave) and (aux2^.proximo <> nil) and (ref_descritor.adicionado = False) do
+							begin                                                              
+								   aux2:= aux2^.proximo;//antes de parar o while, e caso a posição que será inserida for a última, então aux2 parará no último nó criado, tornando false a condição do while e saindo do loop
+								   if aux2^.palavra_chave >= ref_descritor.palavra_chave then // se a palavra que aux2 estiver apontado for maior que a inserção, então aux1 ainda estará na anterior a essa, permitindo a conexão
+								   begin                                    
+								   		 node^.anterior := aux;
+								   		 node^.palavra_chave:=ref_descritor.palavra_chave;
+								   		 node^.ponteiro_dict:= nil;
+								   		 node^.proximo:= aux2;
+								   		 aux2^.anterior:= node;
+								   		 aux^.proximo:=node;
+								   		 writeln('Palavra: "',node^.palavra_chave,'" adicionada!');
+		 									 ref_descritor.adicionado := True; //em um caso muito específico onde a palavra inserida é entre a ultima e penúltima, ocorre um bug que a palavra é adicionada aqui e no if de baixo, substituindo a ultima palavra 
+											 readkey;
+											 limpa_tela();
+								   end
+								   else // caso não encontre uma posição intermediária para inserir, então aux += aux
+								   		aux:= aux^.proximo;
+							end;
+						if (aux2^.proximo = nil) and (ref_descritor.adicionado = False) then// caso aux2 pare na última posição: node é 'populado' e ligado a lista como sendo o ultimo
+							begin
+								node^.anterior := aux2;
+								node^.palavra_chave := ref_descritor.palavra_chave;
+								node^.ponteiro_dict:= nil;                                        
+								node^.proximo:=nil;
+								aux2^.proximo:= node;
+								writeln('Palavra: "',node^.palavra_chave,'" adicionada!'); 
+								readkey;
+								limpa_tela();
+							end
 					end;
 				end;
 		end;
@@ -131,20 +144,61 @@ end;
 
 //procedure remover_palavra_chave()//2
 procedure incluir_palavra_no_dicionario(var ref_descritor: programa); // a ideia é que ao inserir a palavra o programa já aloque ela na palavra correta automaticamente
-var aux: ptLista;
+var aux,aux2: ptLista;
+var node: ptDict;
 begin
+		new(node);
+		ref_descritor.adicionado := False;
 		aux := ref_descritor.ListaPalavrasChaves;
-	  while (aux^.palavra_chave < ref_descritor.palavra) and (aux^.proximo <> nil)  do
-	  begin
-	  	if (aux^.proximo = nil) and (ref_descritor.ListaPalavrasChaves < ref_descritor.palavra) then  //se estivermos na última posição e ainda sim o último elemento for uma PC menor que a q queremos incluir, então impede incluir
+		
+	  while (aux^.palavra_chave < ref_descritor.palavra_portugues) and (aux^.proximo <> nil) do // faz o aux parar exatamente na palavra chave que queremos inserir o verbete
+	  begin	
+			aux := aux^.proximo;
+		end;
+		//se estivermos na última posição e ainda sim o último elemento for uma Palavra Chave menor que a que queremos incluir, então não existe palavras chaves compativel
+	  if (aux^.proximo = nil) and (aux^.palavra_chave < ref_descritor.palavra_portugues) then  
 			begin
-				writeln('Não existe palavra-chave para suportar este verbete, crie uma nova Palavra-Chave');	//talvez chamar função de criar a palavra chave
+				writeln('Não existe palavra-chave para suportar este verbete, crie uma nova Palavra-Chave maior que ',aux^.palavra_chave);	//talvez chamar função de criar a palavra chave
+			end	
+		else // em qualquer outra posição de inserção, esse Else ocorre
+			begin
+			    // só executa esse if/while caso EXISTAM palavras dentro de um dicionário
+					ref_descritor.duplicada := False;		
+					if aux^.ponteiro_dict <> nil then
+						begin
+							aux := aux^.ponteiro_dict;
+							while (aux^.prox_dicionario <> nil) and (ref_descritor.duplicada = False) do
+								if ref_descritor.palavra_portugues = aux^.verbete_PTBR then // se a palavra que queremos inserir for igual à algum verbete anteriormente adicionado, então duplicados não permitidos
+									begin
+									    writeln('A palavra ',ref_descritor.palavra_portugues,' já está no dicionário! Duplicadas não são permitidas');
+									    ref_descritor.duplicada := True;
+									end;
+								aux := aux^.prox_dicionario;
+						end;
+					// caso não existam duplicadas: 	
+					if ref_descritor.duplicada = False then
+					begin
+				    if node = nil then
+				    	writeln('Memória Cheia!')
+				    	
+				    else if (aux^.ponteiro_dict = nil) then // se essa for a primeira palavra a ser incluido então esse Else if ocorre
+				    	begin
+				    		node^.ant_dicionario := aux^.ponteiro_dict;    
+				    		node^.verbete_PTBR := ref_descritor.palavra_portugues;
+				    		node^.verbete_ING := ref_descritor.palavra_ingles;
+				    		node^.prox_dicionario := nil;
+				    		aux^.ponteiro_dict := node;
+				    	end
+				    	
+				    else // caso já haja palavra já associadas é palavra chave, esse Else ocorre
+				      begin  // esse Else vai tratar de encontrar a posição correta e inserir, seja entre palavras ou no fim
+				      	
+				      end;
+			    end;
 			end;
-			else if
-			aux:= aux^.proximo;
-			if	
+				
+			
 end;
-
 //procedure remover_palavra_do_dicionario()//4
 //function escrever_dicionario()   //6
 
@@ -176,7 +230,7 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////
-Begin
+Begin        {FAZER INICIO E FIM DA LISTA, PARA QUE POSSA SER PERCORRIDA DE TRÁS PARA FRENTE}
 	
 	cria_lista_palavras(descritor);                           
 	descritor.opcao := 10;
@@ -194,44 +248,47 @@ Begin
 		writeln('Escolha uma das opções a cima: ');
 		readln(descritor.opcao);                    
 		
-		if descritor.opcao = 1 then
+		if descritor.opcao = 1 then // incluir palavra chave OK
 		begin
 			limpa_tela();
-			ler_palavra(descritor);
+			ler_palavra_chave(descritor);
 			limpa_tela();
 			incluir_palavra_chave(descritor);
 		end
 		 
-		else if descritor.opcao = 2 then
-			remover_palavra_chave()
+		else if descritor.opcao = 2 then  // remover palavra chave (transferir palavras desse dicionário para o dicionário anterior)
+		begin
+			ler_palavra_chave(descritor);
+			remover_palavra_chave();
+		end	
 			
-		else if descritor.opcao = 3 then
+		else if descritor.opcao = 3 then   // incluir no dicionário automáticamente
 		begin
 			limpa_tela();
-			ler_palavra(descritor);
+			ler_palavras_pt_ing(descritor);
 			limpa_tela();
 			incluir_palavra_no_dicionario(descritor);
 		end
 		
-		else if descritor.opcao = 4 then
+		else if descritor.opcao = 4 then   // remover palavra do dicionário
 		begin
-			ler_palavra(descritor);
+			ler_palavra_pt_ing(descritor);
 			remover_palavra_do_dicionario(descritor);
 		end
 		
-		else if descritor.opcao = 5 then
+		else if descritor.opcao = 5 then // escrever todos os dicionários
 		begin
 			ler_palavra(descritor);
 			escrever_tudo(descritor);
 		end
 			
-		else if descritor.opcao = 6 then
+		else if descritor.opcao = 6 then   // escrever dicionário escolhido pelo usuário
 			escrever_dicionario_escolha(descritor) 
 		
-		else if descritor.opcao = 7 then
+		else if descritor.opcao = 7 then    //  escolher palavra e trazer tradução
 			buscar_traducao(descritor)
 				
-		else if descritor.opcao = 99 then    //****
+		else if descritor.opcao = 99 then    // remover dps
 		begin
 			limpa_tela();
 			consultar_palavra_chave(descritor);
