@@ -44,9 +44,9 @@ end;
 ////////////////////////////////////////////////////////////	 
 procedure cria_lista_palavras(var ref_descritor: programa);
 begin
-		 ref_descritor.ListaPalavrasChaves:= nil;
-		 ref_descritor.head_PalavrasChaves:= nil;
-		 ref_descritor.tail_PalavrasChaves:= nil;
+		 ref_descritor.ListaPalavrasChaves	:= nil;
+		 ref_descritor.head_PalavrasChaves	:= nil;
+		 ref_descritor.tail_PalavrasChaves	:= nil;
 end;
 ////////////////////////////////////////////////////////////
 procedure ler_palavra_chave(var ref_descritor: programa);
@@ -114,9 +114,10 @@ begin
 								end;
 							aux:= aux^.proximo;
 						end;
-					// tudo aqui embaixo só será executado se NÃO houver duplicidade	
+					// tudo aqui embaixo só será executado se NÃO houver duplicidade
+						
 					if (ref_descritor.palavra_chave < ref_descritor.head_PalavrasChaves^.palavra_chave) and (ref_descritor.duplicada = False) then 
-						begin// Esse IF verifica se a palavra a ser incluida é a menor de todas, até mesmo que a 1ª da lista 	
+						begin// verifica se a palavra a ser incluida é a menor de todas, até mesmo que a 1ª da lista 	
 							
 							node^.anterior                                := nil;                        
 							node^.palavra_chave 													:= ref_descritor.palavra_chave;
@@ -128,43 +129,44 @@ begin
 								
 							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 
 							readkey;	
-							limpa_tela()
+							limpa_tela();
+						end
+					
+					else if (ref_descritor.palavra_chave > ref_descritor.tail_PalavrasChaves^.palavra_chave) and (ref_descritor.duplicada = False) then
+						begin   // verifica se a palavra é a maior de todas
+						
+							node^.anterior                                := ref_descritor.tail_PalavrasChaves;                        
+							node^.palavra_chave 													:= ref_descritor.palavra_chave;
+							node^.ponteiro_dict														:= nil;
+							node^.proximo																	:= nil;
+							ref_descritor.tail_PalavrasChaves^.proximo    := node;
+							ref_descritor.tail_PalavrasChaves 						:= node;
+								
+							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 
+							readkey;	
+							limpa_tela();	
 						end
 						
-					else if (ref_descritor.duplicada = False) then // agora é onde iremos perocorrer os nós até achar uma posição que se encaixe
+					else if (ref_descritor.duplicada = False) then // se não é a menor e nem a maior, então percorre
 						begin
 							ref_descritor.adicionado:= False;
-						  aux:= ref_descritor.head_PalavrasChaves;  
+						  aux:= ref_descritor.head_PalavrasChaves;
+							  
 							while (aux^.palavra_chave < ref_descritor.palavra_chave) and (aux^.proximo <> nil) do
 							    aux := aux^.proximo; // axu para um Nó na frente do que se deseja incluir
 							
-							
-							if (aux^.palavra_chave > ref_descritor.palavra_chave) and (ref_descritor.adicionado = False) then
-							begin
-							    aux2 := aux^.anterior;
-							    node^.anterior      := aux2;
-							    node^.palavra_chave := ref_descritor.palavra_chave;
-							    node^.ponteiro_dict := nil;
-							    node^.proximo       := aux;
-							    aux2^.proximo       := node;
-							    aux^.anterior       := node;
-							    ref_descritor.adicionado := True;
-							    writeln('Palavra-Chave: "', node^.palavra_chave, '" adicionada!');
-							    readkey;
-							    limpa_tela();
+						   aux2 							 	:= aux^.anterior;
+						   node^.anterior      	:= aux2;
+							 node^.palavra_chave 	:= ref_descritor.palavra_chave;
+							 node^.ponteiro_dict 	:= nil;
+							 node^.proximo       	:= aux;
+							 aux2^.proximo       	:= node;
+							 aux^.anterior       	:= node;
+							 ref_descritor.adicionado := True;
+							 writeln('Palavra-Chave: "', node^.palavra_chave, '" adicionada!');
+							 readkey;
+							 limpa_tela();
 							end;
-						if (aux^.proximo = nil) and (ref_descritor.adicionado = False) then// caso aux2 pare na última posição: node é 'populado' e ligado a lista como sendo o ultimo
-							begin
-								node^.anterior := aux;
-								node^.palavra_chave := ref_descritor.palavra_chave;   // node.palavra_chave = Palavra Chave da Lista |||| ref_descritor.palavra_chave = palavra informada pelo user
-								node^.ponteiro_dict := nil;                                        
-								node^.proximo := nil;
-								aux^.proximo := node;
-								ref_descritor.tail_PalavrasChaves := node;
-								writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 
-								readkey;
-								limpa_tela();
-							end
 					end;
 				end;
 		end;
@@ -182,9 +184,13 @@ begin
 		
 		else
 		begin
+			limpa_tela();
+			ler_palavras_pt_ing(descritor);
+			
 			new(node);
 			ref_descritor.adicionado := False;
 			aux := ref_descritor.head_PalavrasChaves;
+			
 		  while (aux^.palavra_chave < ref_descritor.palavra_portugues) and (aux^.proximo <> nil) do // faz o aux parar exatamente na palavra chave que queremos inserir o verbete
 		  begin	
 				aux := aux^.proximo;
@@ -222,10 +228,10 @@ begin
 						    	
 						    else if (aux^.ponteiro_dict = nil) then // se essa for a primeira palavra a ser incluido então esse Else if ocorre
 						    	begin  
-						    		node^.verbete_PTBR := ref_descritor.palavra_portugues;
-						    		node^.verbete_ING := ref_descritor.palavra_ingles;
-						    		node^.prox_dicionario := nil;
-						    		aux^.ponteiro_dict := node;
+						    		node^.verbete_PTBR 				:= ref_descritor.palavra_portugues;
+						    		node^.verbete_ING 				:= ref_descritor.palavra_ingles;
+						    		node^.prox_dicionario 		:= nil;
+						    		aux^.ponteiro_dict 				:= node;
 						    	end
 						    	
 						    else // caso já haja palavra já associadas a palavra chave, esse Else ocorre
@@ -234,10 +240,10 @@ begin
 						      	   if (ref_descritor.palavra_portugues < aux2^.verbete_PTBR) then// caso for menor que a primeira
 						      	   		begin
 	
-						      	   	  	node^.verbete_PTBR := ref_descritor.palavra_portugues;
-						      	   	  	node^.verbete_ING := ref_descritor.palavra_ingles;
-						      	   	  	node^.prox_dicionario := aux2;
-						      	   	  	aux^.ponteiro_dict:=node;
+						      	   	  	node^.verbete_PTBR		 := ref_descritor.palavra_portugues;
+						      	   	  	node^.verbete_ING 		 := ref_descritor.palavra_ingles;
+						      	   	  	node^.prox_dicionario  := aux2;
+						      	   	  	aux^.ponteiro_dict		 := node;
 						      	   		end
 						      	   else  // esse Else vai tratar de encontrar a posição correta e inserir
 						      	   		begin
@@ -319,8 +325,6 @@ Begin        {FAZER INICIO E FIM DA LISTA, PARA QUE POSSA SER PERCORRIDA DE TRÁ
 			
 		else if descritor.opcao = 3 then   // incluir no dicionário automáticamente
 		begin
-			limpa_tela();
-			ler_palavras_pt_ing(descritor);
 			limpa_tela();
 			incluir_palavra_no_dicionario(descritor);
 		end
