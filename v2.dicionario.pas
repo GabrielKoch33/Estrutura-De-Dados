@@ -37,6 +37,7 @@ var
 ////////////////////////////////////////////////////////////	
 procedure limpa_tela();
 begin
+	readkey;
 	clrscr;
 end;	 
 ////////////////////////////////////////////////////////////	 
@@ -106,7 +107,6 @@ begin
           ref_descritor.tail_PalavrasChaves		 := node; //fim também, afinal o unico elemento é o primeiro e o ultimo 
 					 
 					writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 
-					readkey;
 					limpa_tela();
 				end                                
 			else                                                                                                                                                         
@@ -119,7 +119,6 @@ begin
 							if aux^.palavra_chave = ref_descritor.palavra_chave then
 								begin
 									writeln('A palavra-Chave: "',ref_descritor.palavra_chave,'" já está no dicionário! Duplicadas não são permitidas');
-									readkey;
 									limpa_tela();
 								  ref_descritor.duplicada := True;
 								end;
@@ -138,8 +137,7 @@ begin
 							ref_descritor.head_PalavrasChaves 						:= node;
 							
 								
-							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 
-							readkey;	
+							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 	
 							limpa_tela();
 						end
 					
@@ -153,8 +151,7 @@ begin
 							ref_descritor.tail_PalavrasChaves^.proximo    := node;
 							ref_descritor.tail_PalavrasChaves 						:= node;
 								
-							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 
-							readkey;	
+							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 	
 							limpa_tela();	
 						end
 						
@@ -175,7 +172,6 @@ begin
 							 aux^.anterior       	:= node;
 							 ref_descritor.adicionado := True;
 							 writeln('Palavra-Chave: "', node^.palavra_chave, '" adicionada!');
-							 readkey;
 							 limpa_tela();
 						end;
 				end;
@@ -190,69 +186,82 @@ begin
 		if ref_descritor.head_PalavrasChaves = nil then
 		begin
 			writeln('Nenhuma Palavra-Chave foi cadastrada! Por favor cadastre Palavras-Chaves para então criar dicionários/verbetes específicos');
+			limpa_tela();
 		end
-		
-		//se estivermos na última posição e ainda sim o último elemento for uma Palavra Chave menor que a que queremos incluir, então não existe palavras chaves compativel
-		else if (ref_descritor.tail_PalavrasChaves^.palavra_chave < ref_descritor.palavra_portugues) then  
+		else
 		begin
-			writeln('Não existe palavra-chave para suportar este Verbete, crie uma nova Palavra-Chave maior que ',ref_descritor.tail_PalavrasChaves^.palavra_chave);
-		end
-				
-		else // Se for possível adicionar o verbete, então esse else ocorre
+			ler_palavras_pt_ing(descritor);
+		//se estivermos na última posição e ainda sim o último elemento for uma Palavra Chave menor que a que queremos incluir, então não existe palavras chaves compativel
+			if (ref_descritor.tail_PalavrasChaves^.palavra_chave < ref_descritor.palavra_portugues) then  
 			begin
+				writeln('Não existe palavra-chave para suportar este Verbete, crie uma nova Palavra-Chave maior que ',ref_descritor.tail_PalavrasChaves^.palavra_chave);
 				limpa_tela();
-				new(node);
-        if node = nil then
-					writeln('Memória Cheia!')
-				else
+			end
+				
+			else // Se for possível adicionar o verbete, então esse else ocorre
 				begin
-					ler_palavras_pt_ing(descritor);
-					// If para adicionar a palavra/pt/ing no primeiro elemento
-					///////////////////////////////////////////////////
-					if ref_descritor.head_PalavrasChaves^.palavra_chave > ref_descritor.palavra_portugues then
-					begin
-						 aux := ref_descritor.head_PalavrasChaves;
-						 if aux^.ponteiro_dict = nil then // não existem palavras, logo n checa duplicada
-						 begin  
-								 	node^.verbete_PTBR 				:= ref_descritor.palavra_portugues;
-								  node^.verbete_ING 				:= ref_descritor.palavra_ingles;
-								  node^.prox_dicionario 		:= nil;
-								  aux^.ponteiro_dict 				:= node;
-						 end
-					   else// se possuir elementos, então verifica duplicadas
-						 begin
-								aux2 := aux^.ponteiro_dict;				
-								if verifica_duplicada_no_dict(ref_descritor, aux2) = True then
-									writeln('O Verbete ',ref_descritor.palavra_portugues,' já está no dicionário! Duplicadas não são permitidas!')
-								else
-									begin
-										 ref_descritor.adicionado := False;
-										 aux3 := aux2;
-										 while (aux3^.prox_dicionario <> nil) and ( aux3^.verbete_PTBR < ref_descritor.palavra_portugues ) do
-										 begin
-										 	aux2:= aux3^.prox_dicionario;
-										 	if aux3^.verbete_PTBR > ref_descritor.palavra_portugues then //verifica as posições a fim de encontrar ANTERIOR(aux2) e POSTERIOR(aux3)
-										 		begin
-										  			node^.verbete_PTBR 		   := ref_descritor.palavra_portugues;
-								  					node^.verbete_ING 		   := ref_descritor.palavra_ingles;
-										  			node^.prox_dicionario 	 := aux3;
-										  			aux2^.prox_dicionario 	 := node;
-										  			ref_descritor.adicionado := True;
-										  	end
-										 	else
-										 		aux2:= aux2^.prox_dicionario;
-										 	end;
-										 if (aux3^.prox_dicionario = nil) and (ref_descritor.adicionado = False) then // caso seja o último elemento
-										 	begin
-										 		  node^.verbete_PTBR 		:= ref_descritor.palavra_portugues;
-								  				node^.verbete_ING 		:= ref_descritor.palavra_ingles;
-										  		node^.prox_dicionario := nil;
-										  		aux3^.prox_dicionario := node;
-										 	end;
-									  writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.head_PalavrasChaves^.palavra_chave);
-									end;	
-					   end;
+					new(node);
+	        if node = nil then
+	        begin
+						writeln('Memória Cheia!');
+						limpa_tela();
 					end
+					else
+					begin
+						// If para adicionar a palavra/pt/ing no primeiro elemento
+						///////////////////////////////////////////////////
+						if ref_descritor.head_PalavrasChaves^.palavra_chave > ref_descritor.palavra_portugues then
+						begin
+							 aux := ref_descritor.head_PalavrasChaves;
+							 if aux^.ponteiro_dict = nil then // não existem palavras, logo n checa duplicada
+							 begin  
+									 	node^.verbete_PTBR 				:= ref_descritor.palavra_portugues;
+									  node^.verbete_ING 				:= ref_descritor.palavra_ingles;
+									  node^.prox_dicionario 		:= nil;
+									  aux^.ponteiro_dict 				:= node;
+									  writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.head_PalavrasChaves^.palavra_chave);
+										limpa_tela();
+							 end
+						   else// se possuir elementos, então verifica duplicadas
+							 begin
+									aux2 := aux^.ponteiro_dict;				
+									if verifica_duplicada_no_dict(ref_descritor, aux2) = True then
+									begin
+										writeln('O Verbete ',ref_descritor.palavra_portugues,' já está no dicionário! Duplicadas não são permitidas!');
+										limpa_tela();
+									end
+									else
+										begin
+											 ref_descritor.adicionado := False;
+											 aux3 := aux2;
+											 while (aux3^.prox_dicionario <> nil) and ( aux3^.verbete_PTBR < ref_descritor.palavra_portugues ) do
+											 begin
+											 	aux3:= aux3^.prox_dicionario;
+											 	if aux3^.verbete_PTBR > ref_descritor.palavra_portugues then //verifica as posições a fim de encontrar ANTERIOR(aux2) e POSTERIOR(aux3)
+											 		begin
+											  			node^.verbete_PTBR 		   := ref_descritor.palavra_portugues;
+									  					node^.verbete_ING 		   := ref_descritor.palavra_ingles;
+											  			node^.prox_dicionario 	 := aux3;
+											  			aux2^.prox_dicionario 	 := node;
+											  			ref_descritor.adicionado := True;
+	 									  			  writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.head_PalavrasChaves^.palavra_chave);
+										          limpa_tela();
+											  	end
+											 	else
+											 		aux2:= aux2^.prox_dicionario;
+											 	end;
+											 if (aux3^.prox_dicionario = nil) and (ref_descritor.adicionado = False) then // caso seja o último elemento
+											 	begin
+											 		  node^.verbete_PTBR 		:= ref_descritor.palavra_portugues;
+									  				node^.verbete_ING 		:= ref_descritor.palavra_ingles;
+											  		node^.prox_dicionario := nil;
+											  		aux3^.prox_dicionario := node;
+											  		writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.head_PalavrasChaves^.palavra_chave);
+										        limpa_tela();
+											 	end;	 
+										end;	
+						   end;
+						end
 				///////////////////////////////////////////////////
 				// else if para adicionar no ultimo elemento (tail)
         else if (ref_descritor.tail_PalavrasChaves^.palavra_chave > ref_descritor.palavra_portugues) and
@@ -265,19 +274,24 @@ begin
                 node^.verbete_ING      := ref_descritor.palavra_ingles;
                 node^.prox_dicionario  := nil;
                 aux^.ponteiro_dict     := node;
+                writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.tail_PalavrasChaves^.palavra_chave);
+								limpa_tela();
             end
             else // se a última PC possuir elementos: 
             begin
                 aux2 := aux^.ponteiro_dict;
-                if verifica_duplicada_no_dict(ref_descritor, aux2 = True) then
-                    writeln('O Verbete ', ref_descritor.palavra_portugues, ' já está no dicionário! Duplicadas não são permitidas!')
+                if verifica_duplicada_no_dict(ref_descritor, aux2) = True then
+                begin
+                    writeln('O Verbete ', ref_descritor.palavra_portugues, ' já está no dicionário! Duplicadas não são permitidas!');
+                    limpa_tela();
+                end
                 else 
                 begin
                 	ref_descritor.adicionado := False;
 									aux3 := aux2;
 									while (aux3^.prox_dicionario <> nil) and ( aux3^.verbete_PTBR < ref_descritor.palavra_portugues ) do
 										begin
-											 aux2:= aux3^.prox_dicionario;
+											 aux3:= aux3^.prox_dicionario;
 											 if aux3^.verbete_PTBR > ref_descritor.palavra_portugues then //verifica as posições a fim de encontrar ANTERIOR(aux2) e POSTERIOR(aux3)
 											 		begin
 											  			node^.verbete_PTBR 		   := ref_descritor.palavra_portugues;
@@ -285,6 +299,8 @@ begin
 											  			node^.prox_dicionario 	 := aux3;
 											  			aux2^.prox_dicionario 	 := node;
 											  			ref_descritor.adicionado := True;
+											  			writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.tail_PalavrasChaves^.palavra_chave);
+									 	          limpa_tela();
 											  	end
 											 	else
 											 		aux2:= aux2^.prox_dicionario;
@@ -295,70 +311,73 @@ begin
 									  				node^.verbete_ING 		:= ref_descritor.palavra_ingles;
 											  		node^.prox_dicionario := nil;
 											  		aux3^.prox_dicionario := node;
+											  		writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.tail_PalavrasChaves^.palavra_chave);
+									 					limpa_tela();
 												end;
-									 	writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.tail_PalavrasChaves^.palavra_chave);
 								end;
             end;
         end
-        else
+        else // procura a posição qualquer, afinal ñ esta em head nem em tail
 					begin
-						 // procura a posição qualquer
-					end
+							aux:= ref_descritor.head_PalavrasChaves^.proximo;
+						  while (aux^.palavra_chave < ref_descritor.palavra_portugues) and (aux^.proximo <> nil) do 
+				  		begin 	
+								aux := aux^.proximo; // aux é setado na PC correta
+							end;
+							
+							if aux^.ponteiro_dict = nil then
+          		begin
+                node^.verbete_PTBR     := ref_descritor.palavra_portugues;
+                node^.verbete_ING      := ref_descritor.palavra_ingles;
+                node^.prox_dicionario  := nil;
+                aux^.ponteiro_dict     := node;
+                writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', aux^.palavra_chave);
+                limpa_tela();
+            	end
+            	else
+            	begin
+            		aux2 := aux^.ponteiro_dict;
+            		if verifica_duplicada_no_dict(ref_descritor, aux2) then
+            		begin
+                    writeln('O Verbete ', ref_descritor.palavra_portugues, ' já está no dicionário! Duplicadas não são permitidas!');
+                    limpa_tela();
+                end
+                else
+                begin
+                  ref_descritor.adicionado := False;
+									aux3 := aux2;
+									while (aux3^.prox_dicionario <> nil) and ( aux3^.verbete_PTBR < ref_descritor.palavra_portugues ) do
+										begin
+											 aux3:= aux3^.prox_dicionario;
+											 if aux3^.verbete_PTBR > ref_descritor.palavra_portugues then //verifica as posições a fim de encontrar ANTERIOR(aux2) e POSTERIOR(aux3)
+											 		begin
+											  			node^.verbete_PTBR 		   := ref_descritor.palavra_portugues;
+									  					node^.verbete_ING 		   := ref_descritor.palavra_ingles;
+											  			node^.prox_dicionario 	 := aux3;
+											  			aux2^.prox_dicionario 	 := node;
+											  			ref_descritor.adicionado := True;
+											  			writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', aux^.palavra_chave);
+											  			limpa_tela();
+											  	end
+											 	else
+											 		aux2:= aux2^.prox_dicionario;
+										end;
+											if (aux3^.prox_dicionario = nil) and (ref_descritor.adicionado = False) then // caso seja o último elemento
+												begin
+													  node^.verbete_PTBR 		:= ref_descritor.palavra_portugues;
+									  				node^.verbete_ING 		:= ref_descritor.palavra_ingles;
+											  		node^.prox_dicionario := nil;
+											  		aux3^.prox_dicionario := node;
+											  		writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', aux^.palavra_chave);
+											  		limpa_tela();
+												end;
+									end;
+            	end;
+					end;
+				end;
     end; 
-end;     
-				
-				
-				
-				else // caso a palavra chave de inserção não seja a primeira nem a última, então esse else procura a palavra no dicionário
-				begin
-				  while (aux^.palavra_chave < ref_descritor.palavra_portugues) and (aux^.proximo <> nil) do 
-				  begin 	
-						aux := aux^.proximo; // aux é setado na PC correta
-					end;
-					aux2 := aux^.ponteiro_dict;				
-					verifica_duplicada_no_dict(ref_descritor, aux2);					 				
-					
-   				if ref_descritor.duplicada = False then
-						begin
-						    if node = nil then
-						    	writeln('Memória Cheia!')
-						    	
-						    else if (aux^.ponteiro_dict = nil) then // se essa for a primeira palavra a ser incluido então esse Else if ocorre
-							    	begin  
-							    		node^.verbete_PTBR 				:= ref_descritor.palavra_portugues;
-							    		node^.verbete_ING 				:= ref_descritor.palavra_ingles;
-							    		node^.prox_dicionario 		:= nil;
-							    		aux^.ponteiro_dict 				:= node;
-							    	end
-								    	
-							  else // caso já haja palavra já associadas a palavra chave, esse Else ocorre
-							      begin  
-										   aux2:= aux^.ponteiro_dict;
-							      	   if (ref_descritor.palavra_portugues < aux2^.verbete_PTBR) then// caso for menor que a primeira
-							      	   		begin
-			
-							      	   	  	node^.verbete_PTBR		 := ref_descritor.palavra_portugues;
-							      	   	  	node^.verbete_ING 		 := ref_descritor.palavra_ingles;
-							      	   	  	node^.prox_dicionario  := aux2;
-							      	   	  	aux^.ponteiro_dict		 := node;
-							      	   		end
-							      	   else  // esse Else vai tratar de encontrar a posição correta e inserir
-							      	   		begin
-								      	   		    /// percorre as palavras cadastradas a fim de encontrar a posição de inserção
-								      	   		    
-							      	   		end;
-								    end;
-						end;
-					end;
-				end	
-				
-				
-				else //momento de percorrer o a lista em busca da palavra certa
-							// caso não existam duplicadas: 	
-
-			end;		
-			
-end;
+  end;
+end;   
 //procedure remover_palavra_do_dicionario()//4
 //function escrever_dicionario()   //6
 
@@ -367,7 +386,7 @@ var i   : integer;
 var aux : ptLista;
 begin
     if (ref_descritor.head_PalavrasChaves = nil) then
-    begin
+    begin                                                         
         i := 0;
         writeln('=====================================================');	;
         writeln('Lista de Palavras-Chaves vazia. Nada para exibir :( ');
@@ -468,7 +487,6 @@ Begin        {FAZER INICIO E FIM DA LISTA, PARA QUE POSSA SER PERCORRIDA DE TRÁ
 			descritor.contagem := consultar_palavra_chave(descritor);
 			writeln('Quantidade de Palavras-Chaves: ',descritor.contagem);
 			writeln('=====================================================');	
-			readkey;
 			limpa_tela()
 		end;
 		
