@@ -1,36 +1,43 @@
 Program dicionarioBastos ;
 
 	type
- 	tipo_inf = string;
-  ptLista = ^lista;// permite apontar para palavras-chaves anteriores e posteriores
-  ptDict = ^dicionario; //permite apontar de palavras-chaves para dicionário como de dict -> dict
+ 	tipo_inf 	= string;
+  ptLista 	= ^lista;// permite apontar para palavras-chaves anteriores e posteriores
+  ptDict 		= ^dicionario; //permite apontar de palavras-chaves para dicionário como de dict -> dict
   				  
 		lista = record
-				anterior: ptLista; 
-    		palavra_chave: tipo_inf;  // CARRO - MELHOR (vamos deixar as palavras chaves em .upper()?)
-    		ponteiro_dict: ptDict;
-    		proximo: ptLista;
+				anterior						: ptLista; 
+    		palavra_chave				: tipo_inf;  // CARRO - MELHOR (vamos deixar as palavras chaves em .upper()?)
+    		ponteiro_dict				: ptDict;
+    		proximo							: ptLista;
     		end;
 							
 	  dicionario = record
-    		verbete_PTBR: tipo_inf;
-    		verbete_ING: tipo_inf;
-    		prox_dicionario: ptDict;
+    		verbete_PTBR				: tipo_inf;
+    		verbete_ING					: tipo_inf;
+    		prox_dicionario			: ptDict;
     		end;
     
 	  programa = record
-		 		opcao: integer;
-		 		palavra_chave: tipo_inf;  // palavra que o usuário vai informar, serve tanto para palavra chaves como verbetes
-		 		palavra_ingles: tipo_inf;
-		 		palavra_portugues: tipo_inf;
-		 		ListaPalavrasChaves: ptLista;//ponteiro principal da lista
-		 		adicionado : boolean;
-		 		duplicada : boolean;
-		 		contagem : integer;
-				head_PalavrasChaves: ptLista;
-				tail_PalavrasChaves: ptLista;
+		 		opcao								: integer;
+		 		palavra_chave				: tipo_inf;  // palavra que o usuário vai informar, serve tanto para palavra chaves como verbetes
+		 		palavra_ingles			: tipo_inf;
+		 		palavra_portugues		: tipo_inf;
+		 		ListaPalavrasChaves : ptLista;//ponteiro principal da lista
+		 		adicionado 					: boolean;
+		 		encontrada					: boolean;//sinceramente essa var nem precisava existir, mas vou criar para tornar "indentificavel" seu uso, mas no lugar dela podia ser qualquer outra booleana
+		 		duplicada 					: boolean;
+		 		contagem 						: integer;
+				head_PalavrasChaves	: ptLista;
+				tail_PalavrasChaves	: ptLista;
 		 		end;
-		 
+{COISAS A FAZER: | PC = Palavra Chave
+- No inserir palavras-chaves temos que implementar isso: Considerando que existe a PC [R] com os verbetes = ([F][I][L][M]), posteriormente criamos a PC 2 [K]. Percebe-se que [F] e [I] são menores que
+[K], logo, devem ser transferidas. Por isso que, quando criamos uma PC ex: [K] que antecede uma outra ex: [R], devemos ir na próxima PC e transferir os itens que são menores que PC 2 [K].
+A notícia boa é que vai estar ordenado então independente da quantidade de valores é só pegar a primeira palavra, percorrer e parar em uma maior, e conectar os dicionários, sem perda de dados.
+- A Engenharia reversa deve ser feita na remoção de PCs tbm, onde vamos remover a PC e a anterior deve receber os Verbetes maiores, os verbetes vão ser inseridos no ultimo nó da PC menor.
+- Na função de escrever todos os dicionários: User seleciona ordem ascendente [A] e decrescente [D], dependendo da escolha, basta iniciar por HEAD (marca início) ou TAIL (marca o último elemento)
+}	 
 var
 	 descritor: programa;
 
@@ -50,6 +57,7 @@ end;
 ////////////////////////////////////////////////////////////
 procedure ler_palavra_chave(var ref_descritor: programa);
 begin
+		writeln('=====================================================');	
     writeln('Digite uma Palavra-Chave: ');
     readln(ref_descritor.palavra_chave);
     ref_descritor.palavra_chave := upcase(ref_descritor.palavra_chave);
@@ -57,11 +65,14 @@ end;
 
 procedure ler_palavras_pt_ing(var ref_descritor: programa);
 begin
+		writeln('=====================================================');	
 		writeln('Digite o Verbete em Português: ');
 		readln(ref_descritor.palavra_portugues);
 		ref_descritor.palavra_portugues := upcase(ref_descritor.palavra_portugues);
+		writeln('=====================================================');	
 		writeln('Digite o Verbete em Inglês: ');
 		readln(ref_descritor.palavra_ingles);
+		writeln('=====================================================');	
 		ref_descritor.palavra_ingles := upcase(ref_descritor.palavra_ingles);
 end;
 ////////////////////////////////////////////////////////////
@@ -78,16 +89,23 @@ begin
 verifica_duplicada_no_dict:= ref2_descritor.duplicada;
 end;
 ////////////////////////////////////////////////////////////
-{function escrever_tudo(ref_descritor);
-begin
-end;}
-////////////////////////////////////////////////////////////
-{function buscar_traducao(ref_descritor);
+function escreve_itens(ref_aux2: ptDict; ref_i: integer): integer;
 begin                                   
-end                                     }
+while ref_aux2^.prox_dicionario <> nil do
+	  begin
+	     writeln(ref_i,' - Português: ', ref_aux2^.verbete_PTBR,' | Inglês: ',ref_aux2^.verbete_ING);    
+	     ref_aux2 := ref_aux2^.prox_dicionario;
+	     ref_i := ref_i + 1; 
+	  end;
+	  writeln(ref_i,' - Português: ', ref_aux2^.verbete_PTBR,' | Inglês: ',ref_aux2^.verbete_ING);
+	  writeln('=====================================================');	
+	  escreve_itens := ref_i;
+end;
 ////////////////////////////////////////////////////////////
+
 procedure incluir_palavra_chave(var ref_descritor: programa);
 var node,aux,aux2: ptLista;
+var aux3, aux4: ptDict;
 begin
 	new(node);//node é igual a aux nos primeiros códigos, node = nó = estrutura basica do [anterior,dado,dict,prox]
 	if node = nil then
@@ -109,8 +127,8 @@ begin
 					writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 
 					limpa_tela();
 				end                                
-			else                                                                                                                                                         
-			   // verfica duplicatas quando se tem pelo menos um elemento
+			else // possui elementos                                                                                                                                                        
+			   // verfica duplicatas quando se tem pelo menos um elemento //TALVEZ TRANSFORMAR EM FUNÇÃO?
 				begin
 					ref_descritor.duplicada := False;
 					aux:= ref_descritor.head_PalavrasChaves;  
@@ -131,11 +149,28 @@ begin
 							
 							node^.anterior                                := nil;                        
 							node^.palavra_chave 													:= ref_descritor.palavra_chave;
-							node^.ponteiro_dict														:= nil;
+							node^.ponteiro_dict														:= ref_descritor.head_PalavrasChaves^.ponteiro_dict;
 							node^.proximo																	:= ref_descritor.head_PalavrasChaves;
 							ref_descritor.head_PalavrasChaves^.anterior 	:= node;
-							ref_descritor.head_PalavrasChaves 						:= node;
 							
+							aux4 := nil;
+							aux3 := ref_descritor.head_PalavrasChaves^.ponteiro_dict;
+
+							while (aux3 <> nil) and (aux3^.verbete_PTBR < node^.palavra_chave) do
+							begin
+							    aux4 := aux3;
+							    aux3 := aux3^.prox_dicionario;
+							end; 
+							               
+							if aux4 = nil then  // aux4 só será nil quando nenhuma palavra do head for menor que node
+							    node^.ponteiro_dict := nil
+							else
+							begin
+							    node^.ponteiro_dict := ref_descritor.head_PalavrasChaves^.ponteiro_dict;   // node agora aponta para esse dicionário 
+							    aux4^.prox_dicionario := nil; // corta o link entre as palavras que vão e as que ficam 
+							end;
+							ref_descritor.head_PalavrasChaves^.ponteiro_dict := aux3;
+							ref_descritor.head_PalavrasChaves := node; 
 								
 							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 	
 							limpa_tela();
@@ -179,6 +214,7 @@ begin
 end;
 
 //procedure remover_palavra_chave()//2
+
 procedure incluir_palavra_no_dicionario(var ref_descritor: programa); // a ideia é que ao inserir a palavra o programa já aloque ela na palavra correta automaticamente
 var aux: ptLista;
 var node, aux2, aux3: ptDict;
@@ -282,7 +318,7 @@ begin
                 aux2 := aux^.ponteiro_dict;
                 if verifica_duplicada_no_dict(ref_descritor, aux2) = True then
                 begin
-                    writeln('O Verbete ', ref_descritor.palavra_portugues, ' já está no dicionário! Duplicadas não são permitidas!');
+                    writeln('O Verbete ', ref_descritor.palavra_portugues,' já está no dicionário! Duplicadas não são permitidas!');
                     limpa_tela();
                 end
                 else 
@@ -371,18 +407,93 @@ begin
 											  		writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', aux^.palavra_chave);
 											  		limpa_tela();
 												end;
-									end;
-            	end;
-					end;
+									 end;
+            		end;
+						end;
 				end;
     end; 
   end;
+end;
+   
+procedure remover_palavra_do_dicionario(var ref_descritor: programa);
+var aux: ptLista;
+var node, aux2, aux3: ptDict;
+begin
+end;
+
+////////////////////////////////////////////////////////////
+{function escrever_tudo(ref_descritor);
+begin
+end;}
+////////////////////////////////////////////////////////////
+function escrever_dicionario_escolhido(ref_descritor: programa): integer;
+var aux: ptLista;
+var aux2, aux3: ptDict;
+var i: integer;
+begin
+   if (ref_descritor.head_PalavrasChaves = nil) then
+   begin                                                         
+      i := 0;
+      writeln('=====================================================');	
+      writeln('Lista de Palavras-Chaves vazia. Nada para exibir :( ');
+   end
+   
+   else
+   begin
+    	ler_palavra_chave(descritor);   // User informa PC
+    	ref_descritor.encontrada := False;      
+    	aux := ref_descritor.head_PalavrasChaves; // aux aponta para a primeira palavra do dict
+    	
+    	if (aux^.proximo = nil) then  // só existe um elemento, então:
+    	begin
+    		if aux^.palavra_chave = ref_descritor.palavra_chave then  // ele é a palavra informada?
+    		begin
+					ref_descritor.encontrada := True;
+					i := 1;
+					aux2:= aux^.ponteiro_dict;
+					writeln('=====================================================');	
+					writeln('Palavra-Chave: ',aux^.palavra_chave);
+					writeln('=====================================================');	
+					escrever_dicionario_escolhido := escreve_itens(aux2, i);
+				end
+				else
+					writeln('Essa Palavra-Chave não foi cadastrada ou sua ortografia está incorreta. Tente Novamente');		
+    	end
+    	
+    	else // possui mais de um elemento
+    	begin
+	    	while (aux^.proximo <> nil) and (ref_descritor.encontrada = False) do
+	    	begin // ou esse while encerra pq não existe a PC informada ou encerra pq achou
+	    		if aux^.palavra_chave = ref_descritor.palavra_chave then
+	    			begin
+	    				ref_descritor.encontrada := True;
+	    				aux2 := aux^.ponteiro_dict;
+	    			end
+	    		else
+	    			aux:= aux^.proximo;
+	    	end;
+	    	
+	    	if ref_descritor.encontrada = False then
+	    		writeln('Essa Palavra-Chave não foi cadastrada ou sua ortografia está incorreta. Tente Novamente')
+	    	else
+	    	begin
+	    		
+	    		i := 1; 
+	    		escrever_dicionario_escolhido := escreve_itens(aux2, i);
+	    	end;
+	    end;
+   end;
 end;   
-//procedure remover_palavra_do_dicionario()//4
-//function escrever_dicionario()   //6
+
+
+////////////////////////////////////////////////////////////
+{function buscar_traducao(ref_descritor);
+begin                                   
+end;                                     }
+////////////////////////////////////////////////////////////
 
 function consultar_palavra_chave(ref_descritor: programa): integer;//5
-var i   : integer;
+var i   : integer;                                            // até que seria legal transformar em função, mas é tão simples esse bloco que nem vale
 var aux : ptLista;
 begin
     if (ref_descritor.head_PalavrasChaves = nil) then
@@ -408,28 +519,28 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////
-Begin        {FAZER INICIO E FIM DA LISTA, PARA QUE POSSA SER PERCORRIDA DE TRÁS PARA FRENTE}
+Begin    
 	
 	cria_lista_palavras(descritor);                           
 	descritor.opcao := 10;
 	while descritor.opcao <> 0 do
 	begin
 		writeln('=====================================================');	
-	  writeln('1 - Incluir Palavra-Chave'); 				      // 1 //FEITO  
-		writeln('2 - Remover Palavra-Chave');               // 7
-		writeln('3 - Incluir Palavra no Dicionário');       // 2 //EM PROGRESSO
-		writeln('4 - Remover Palavra do Dicionário');       // 3 //
-		writeln('5 - Escrever Todas as Palavras de Todos os Dicionário'); // 6 
-		writeln('6 - Escrever Dicionário de sua Escolha');  // 4       Tornar a 5 e 6 uma unica função?
-		writeln('7 - Buscar Tradução');                     // 5
-		writeln('8 - Consultar Palavras-Chaves'); 
+	  writeln('1 - Incluir Palavra-Chave'); 				      // 1 //FEITO {modificar} 
+		writeln('2 - Remover Palavra-Chave');               // 7 //
+		writeln('3 - Incluir Verbete no Dicionário');       // 2 //FEITO
+		writeln('4 - Remover Verbete do Dicionário');       // 4 //
+		writeln('5 - Escrever Todas as Palavras de Todos os Dicionário'); // 6 {FAZER OPÇÃO CRESCENTE OU DECRESCENTE}
+		writeln('6 - Escrever Dicionário de sua Escolha');  // 3 //FEITO 
+		writeln('7 - Buscar Tradução');                     // 5 // -> pede palavra ptbr -> encontra a pc maior -> acessa -> busca valor -> write palavra ingles
+		writeln('8 - Consultar Palavras-Chaves');           // 0 //FEITO
 		writeln('0 - Sair');
 		writeln('=====================================================');		
 		writeln('Escolha uma das opções a cima: ');
 		read(descritor.opcao);                   
 		 
 		
-		if descritor.opcao = 1 then // incluir palavra chave OK
+		if descritor.opcao = 1 then // incluir palavra chave 													OK
 		begin
 			limpa_tela();
 			ler_palavra_chave(descritor);
@@ -445,13 +556,13 @@ Begin        {FAZER INICIO E FIM DA LISTA, PARA QUE POSSA SER PERCORRIDA DE TRÁ
 		//remover_palavra_chave();
 		end	
 			
-		else if descritor.opcao = 3 then   // incluir no dicionário automáticamente
+		else if descritor.opcao = 3 then   // incluir no dicionário automáticamente  OK
 		begin
 			limpa_tela();
 			incluir_palavra_no_dicionario(descritor);
 		end
 		
-		else if descritor.opcao = 4 then   // remover palavra do dicionário
+		else if descritor.opcao = 4 then   // remover palavra do dicionário        
 		begin
 			limpa_tela();        
 			ler_palavras_pt_ing(descritor);
@@ -470,9 +581,10 @@ Begin        {FAZER INICIO E FIM DA LISTA, PARA QUE POSSA SER PERCORRIDA DE TRÁ
 		else if descritor.opcao = 6 then   // escrever dicionário escolhido pelo usuário
 		begin
 			limpa_tela();
-			ler_palavra_chave(descritor);
+		  descritor.contagem := escrever_dicionario_escolhido(descritor);
+		  writeln('Quantidade de Verbetes: ',descritor.contagem);
+		  writeln('=====================================================');	
 			limpa_tela();
-		//escrever_dicionario_escolha(descritor);
 		end
 		
 		else if descritor.opcao = 7 then    //  escolher palavra e trazer tradução
@@ -501,8 +613,5 @@ End.
 //O protótipo deve ter as opções: incluir a palavra-chave, incluir no dicionário, remover do dicionário, consultar, escrever todo dicionário//
 -O programa deve permitir cadastrar PALAVRAS-CHAVES (PC)
 -Ao criar uma palavra-chave nova intermediária de duas já existêntes (ex: [D]-*[G]*-[M]), teremos que transferir as possíveis palavras D < G < M para que estão em [M] para [G]
--Não será possível cadastrar VERBETES se não houver PALAVRAS-CHAVES
--Se tentar cadastrar um VERBETE que for MAIOR que as todas as PALAVRAS-CHAVES existêntes, não será possível
---Ex: última PC = ônibus, verbete = rato --> Erro --> Logo: criar nova PC
--Ao adicionar novo verbete no dicionário, o programa vai percorrer a lista principal, identificar a PC, acessar o dicionário, percorrer o dict, e inserir na devida posição
+
 }
