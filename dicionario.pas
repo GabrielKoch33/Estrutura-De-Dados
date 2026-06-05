@@ -1,36 +1,36 @@
 Program dicionarioBastos ;
 
-	type
- 	tipo_inf 	= string;
-  ptLista 	= ^lista;// permite apontar para palavras-chaves anteriores e posteriores
-  ptDict 		= ^dicionario; //permite apontar de palavras-chaves para dicionário como de dict -> dict
+	    type
+        tipo_inf 	= string;
+        ptLista 	= ^lista;// permite apontar para palavras-chaves anteriores e posteriores
+        ptDict 		= ^dicionario; //permite apontar de palavras-chaves para dicionário como de dict -> dict
   				  
 		lista = record
-				anterior						: ptLista; 
-    		palavra_chave				: tipo_inf;  // CARRO - MELHOR (vamos deixar as palavras chaves em .upper()?)
-    		ponteiro_dict				: ptDict;
-    		proximo							: ptLista;
+			anterior			: ptLista; 
+    		palavra_chave		: tipo_inf;  // CARRO - MELHOR (vamos deixar as palavras chaves em .upper()?)
+    		ponteiro_dict		: ptDict;
+    		proximo				: ptLista;
     		end;
 							
 	  dicionario = record
-    		verbete_PTBR				: tipo_inf;
-    		verbete_ING					: tipo_inf;
-    		prox_dicionario			: ptDict;
+    		verbete_PTBR		: tipo_inf;
+    		verbete_ING			: tipo_inf;
+    		prox_dicionario		: ptDict;
     		end;
     
 	  programa = record
-		 		opcao								: integer;
-		 		palavra_chave				: tipo_inf;  // palavra que o usuário vai informar, serve tanto para palavra chaves como verbetes
-		 		palavra_ingles			: tipo_inf;
-		 		palavra_portugues		: tipo_inf;
-		 		ListaPalavrasChaves : ptLista;//ponteiro principal da lista
-		 		adicionado 					: boolean;
-		 		encontrada					: boolean;//sinceramente essa var nem precisava existir, mas vou criar para tornar "indentificavel" seu uso, mas no lugar dela podia ser qualquer outra booleana
-		 		duplicada 					: boolean;
-		 		contagem 						: integer;
-				head_PalavrasChaves	: ptLista;
-				tail_PalavrasChaves	: ptLista;
-		 		end;
+		 	opcao				: integer;
+		 	palavra_chave_user	: tipo_inf;// palavra que o usuário vai informar
+		 	palavra_ingles		: tipo_inf;
+		 	palavra_portugues	: tipo_inf;
+		 	ListaPalavrasChaves : ptLista;//ponteiro principal da lista
+		 	adicionado 			: boolean;
+		 	encontrada			: boolean;//sinceramente essa var nem precisava existir, mas vou criar para tornar "indentificavel" seu uso, mas no lugar dela podia ser qualquer outra booleana
+		 	duplicada 			: boolean;
+		 	contagem 			: integer;
+			head_PalavrasChaves	: ptLista;
+			tail_PalavrasChaves	: ptLista;
+		 	end;
 {COISAS A FAZER: | PC = Palavra Chave
 - No inserir palavras-chaves temos que implementar isso: Considerando que existe a PC [R] com os verbetes = ([F][I][L][M]), posteriormente criamos a PC 2 [K]. Percebe-se que [F] e [I] são menores que
 [K], logo, devem ser transferidas. Por isso que, quando criamos uma PC ex: [K] que antecede uma outra ex: [R], devemos ir na próxima PC e transferir os itens que são menores que PC 2 [K].
@@ -57,10 +57,10 @@ end;
 ////////////////////////////////////////////////////////////
 procedure ler_palavra_chave(var ref_descritor: programa);
 begin
-		writeln('=====================================================');	
+	writeln('=====================================================');	
     writeln('Digite uma Palavra-Chave: ');
-    readln(ref_descritor.palavra_chave);
-    ref_descritor.palavra_chave := upcase(ref_descritor.palavra_chave);
+    readln(ref_descritor.palavra_chave_user);
+    ref_descritor.palavra_chave_user := upcase(ref_descritor.palavra_chave_user);
 end;
 
 procedure ler_palavras_pt_ing(var ref_descritor: programa);
@@ -89,6 +89,45 @@ begin
 verifica_duplicada_no_dict:= ref2_descritor.duplicada;
 end;
 ////////////////////////////////////////////////////////////
+function verifca_duplicada_palavra_chave(ref2_descritor: programa; ref_aux: ptLista): boolean;
+begin
+    while (ref_aux <> nil) and (ref2_descritor.duplicada = False) do
+    	begin
+			if ref_aux^.palavra_chave = ref2_descritor.palavra_chave_user then
+			    begin
+				    writeln('A palavra-Chave: "',ref2_descritor.palavra_chave_user,'" já está no dicionário! Duplicadas não são permitidas');
+				    limpa_tela();
+			        ref2_descritor.duplicada := True;
+			    end;
+		    ref_aux:= ref_aux^.proximo;
+	    end;
+    verifca_duplicada_palavra_chave := ref2_descritor.duplicada;
+end;
+////////////////////////////////////////////////////////////
+procedure transferir_verbetes( var pc_doadora: ptLista; var node_receptora: ptLista; palavra_split: tipo_inf); 
+//palavra split seria a PC nova que o user informou
+var aux4, aux3: ptDict;
+begin 
+    aux4 := nil;
+    aux3 := pc_doadora^.ponteiro_dict;
+
+    while (aux3 <> nil) and (aux3^.verbete_PTBR <= palavra_split) do
+    begin
+       aux4 := aux3;
+       aux3 := aux3^.prox_dicionario;
+    end; 
+
+    if aux4 = nil then  // aux4 só será nil quando nenhuma palavra do head for menor que node
+    begin
+        node_receptora^.ponteiro_dict := nil;// então node·pt_dict passa para NIL ao invés de apontar para o dict de Head
+    end
+    else
+        begin
+            aux4^.prox_dicionario := nil; // corta o link entre as palavras que vão e as que ficam
+        end;
+    pc_doadora^.ponteiro_dict := aux3; // conecta o head as palavras que não foram transferidas
+end;
+////////////////////////////////////////////////////////////
 function escreve_itens(ref_aux2: ptDict; ref_i: integer): integer;
 begin                                   
 while ref_aux2^.prox_dicionario <> nil do
@@ -102,7 +141,6 @@ while ref_aux2^.prox_dicionario <> nil do
 	  escreve_itens := ref_i;
 end;
 ////////////////////////////////////////////////////////////
-
 procedure incluir_palavra_chave(var ref_descritor: programa);
 var node,aux,aux2: ptLista;
 var aux3, aux4: ptDict;
@@ -118,11 +156,11 @@ begin
 			if (ref_descritor.head_PalavrasChaves = nil) then // se for a primeira palavra-chave a ser incluida
 				begin
  					node^.anterior 											 := nil;
-					node^.palavra_chave									 := ref_descritor.palavra_chave;
+					node^.palavra_chave									 := ref_descritor.palavra_chave_user;
 					node^.ponteiro_dict									 := nil;
 					node^.proximo												 := nil;
-				  ref_descritor.head_PalavrasChaves		 := node; //inicio aponta para o 1º inserido
-          ref_descritor.tail_PalavrasChaves		 := node; //fim também, afinal o unico elemento é o primeiro e o ultimo 
+				    ref_descritor.head_PalavrasChaves		 := node; //inicio aponta para o 1º inserido
+                    ref_descritor.tail_PalavrasChaves		 := node; //fim também, afinal o unico elemento é o primeiro e o ultimo 
 					 
 					writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 
 					limpa_tela();
@@ -131,85 +169,72 @@ begin
 			   // verfica duplicatas quando se tem pelo menos um elemento //TALVEZ TRANSFORMAR EM FUNÇÃO?
 				begin
 					ref_descritor.duplicada := False;
-					aux:= ref_descritor.head_PalavrasChaves;  
-					while (aux <> nil) and (ref_descritor.duplicada = False) do
-						begin
-							if aux^.palavra_chave = ref_descritor.palavra_chave then
-								begin
-									writeln('A palavra-Chave: "',ref_descritor.palavra_chave,'" já está no dicionário! Duplicadas não são permitidas');
-									limpa_tela();
-								  ref_descritor.duplicada := True;
-								end;
-							aux:= aux^.proximo;
-						end;
-					// tudo aqui embaixo só será executado se NÃO houver duplicidade
-						
-					if (ref_descritor.palavra_chave < ref_descritor.head_PalavrasChaves^.palavra_chave) and (ref_descritor.duplicada = False) then 
-						begin// verifica se a palavra a ser incluida é a menor de todas, até mesmo que a 1ª da lista 	
-							
-							node^.anterior                                := nil;                        
-							node^.palavra_chave 													:= ref_descritor.palavra_chave;
-							node^.ponteiro_dict														:= ref_descritor.head_PalavrasChaves^.ponteiro_dict;
-							node^.proximo																	:= ref_descritor.head_PalavrasChaves;
-							ref_descritor.head_PalavrasChaves^.anterior 	:= node;
-							
-							aux4 := nil;
-							aux3 := ref_descritor.head_PalavrasChaves^.ponteiro_dict;
+					aux:= ref_descritor.head_PalavrasChaves; 
 
-							while (aux3 <> nil) and (aux3^.verbete_PTBR < node^.palavra_chave) do
-							begin
-							    aux4 := aux3;
-							    aux3 := aux3^.prox_dicionario;
-							end; 
-							               
-							if aux4 = nil then  // aux4 só será nil quando nenhuma palavra do head for menor que node
-							    node^.ponteiro_dict := nil
-							else
-							begin
-							    node^.ponteiro_dict := ref_descritor.head_PalavrasChaves^.ponteiro_dict;   // node agora aponta para esse dicionário 
-							    aux4^.prox_dicionario := nil; // corta o link entre as palavras que vão e as que ficam 
-							end;
-							ref_descritor.head_PalavrasChaves^.ponteiro_dict := aux3;
-							ref_descritor.head_PalavrasChaves := node; 
-								
-							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 	
-							limpa_tela();
-						end
-					
-					else if (ref_descritor.palavra_chave > ref_descritor.tail_PalavrasChaves^.palavra_chave) and (ref_descritor.duplicada = False) then
-						begin   // verifica se a palavra é a maior de todas
-						
-							node^.anterior                                := ref_descritor.tail_PalavrasChaves;                        
-							node^.palavra_chave 													:= ref_descritor.palavra_chave;
-							node^.ponteiro_dict														:= nil;
-							node^.proximo																	:= nil;
-							ref_descritor.tail_PalavrasChaves^.proximo    := node;
-							ref_descritor.tail_PalavrasChaves 						:= node;
-								
-							writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 	
-							limpa_tela();	
-						end
-						
-					else if (ref_descritor.duplicada = False) then // se não é a menor e nem a maior, então percorre
-						begin
-							ref_descritor.adicionado:= False;
-						  aux:= ref_descritor.head_PalavrasChaves;
-							  
-							while (aux^.palavra_chave < ref_descritor.palavra_chave) and (aux^.proximo <> nil) do
-							    aux := aux^.proximo; // axu para um Nó na frente do que se deseja incluir
-							
-						   aux2 							 	:= aux^.anterior;
-						   node^.anterior      	:= aux2;
-							 node^.palavra_chave 	:= ref_descritor.palavra_chave;
-							 node^.ponteiro_dict 	:= nil;
-							 node^.proximo       	:= aux;
-							 aux2^.proximo       	:= node;
-							 aux^.anterior       	:= node;
-							 ref_descritor.adicionado := True;
-							 writeln('Palavra-Chave: "', node^.palavra_chave, '" adicionada!');
-							 limpa_tela();
-						end;
-				end;
+                    if verifca_duplicada_palavra_chave(ref_descritor, aux) = True then
+                        writeln('A palavra-Chave: "',ref_descritor.palavra_chave_user,'" já está no dicionário! Duplicadas não são permitidas')
+					else
+                    begin// tudo aqui embaixo só será executado se NÃO houver duplicidade
+                        if (ref_descritor.palavra_chave_user < ref_descritor.head_PalavrasChaves^.palavra_chave) then 
+                            begin// verifica se a palavra a ser incluida é a menor de todas, até mesmo que a 1ª da lista 	
+                                
+                                node^.anterior                              := nil;                        
+                                node^.palavra_chave 						:= ref_descritor.palavra_chave_user;
+                                node^.ponteiro_dict							:= ref_descritor.head_PalavrasChaves^.ponteiro_dict;
+                                node^.proximo								:= ref_descritor.head_PalavrasChaves;
+                                ref_descritor.head_PalavrasChaves^.anterior := node;
+                                
+                                transferir_verbetes(ref_descritor.head_PalavrasChaves, node, ref_descritor.palavra_chave_user);
+
+                                ref_descritor.head_PalavrasChaves := node;
+
+                                if node^.ponteiro_dict = nil then
+                                    writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!')
+                                else
+                                    writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada e os devidos verbetes foram migrados!'); 	
+                                limpa_tela();
+
+                            end
+                        
+                        else if (ref_descritor.palavra_chave_user > ref_descritor.tail_PalavrasChaves^.palavra_chave) then
+                            begin   // verifica se a palavra é a maior de todas
+                            
+                                node^.anterior                              := ref_descritor.tail_PalavrasChaves;                        
+                                node^.palavra_chave 						:= ref_descritor.palavra_chave_user;
+                                node^.ponteiro_dict							:= nil;
+                                node^.proximo								:= nil;
+                                ref_descritor.tail_PalavrasChaves^.proximo  := node;
+                                ref_descritor.tail_PalavrasChaves 			:= node;
+                                    
+                                writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!'); 	
+                                limpa_tela();	
+                            end
+                            
+                        else// se não é a menor e nem a maior, então percorre
+                            begin
+                                aux:= ref_descritor.head_PalavrasChaves;
+                                
+                                while (aux^.palavra_chave < ref_descritor.palavra_chave_user) and (aux^.proximo <> nil) do
+                                    aux := aux^.proximo; // aux para um Nó na frente do que se deseja incluir
+                                aux2 					:= aux^.anterior; // aux2 recebe um nó antes do que aux
+
+                                node^.anterior      	:= aux2;
+                                node^.palavra_chave 	:= ref_descritor.palavra_chave_user;
+                                node^.ponteiro_dict 	:= aux^.ponteiro_dict;
+                                node^.proximo       	:= aux;
+                                aux2^.proximo       	:= node;
+                                aux^.anterior       	:= node;
+
+                                transferir_verbetes(aux, node, ref_descritor.palavra_chave_user);
+
+                                if node^.ponteiro_dict = nil then
+                                    writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada!')
+                                else
+                                    writeln('Palavra-Chave: "',node^.palavra_chave,'" adicionada e os devidos verbetes foram migrados!'); 	
+                                limpa_tela();
+                            end;
+                    end;
+                end;
 		end;
 end;
 
@@ -446,7 +471,7 @@ begin
     	
     	if (aux^.proximo = nil) then  // só existe um elemento, então:
     	begin
-    		if aux^.palavra_chave = ref_descritor.palavra_chave then  // ele é a palavra informada?
+    		if aux^.palavra_chave = ref_descritor.palavra_chave_user then  // ele é a palavra informada?
     		begin
 					ref_descritor.encontrada := True;
 					i := 1;
@@ -464,7 +489,7 @@ begin
     	begin
 	    	while (aux^.proximo <> nil) and (ref_descritor.encontrada = False) do
 	    	begin // ou esse while encerra pq não existe a PC informada ou encerra pq achou
-	    		if aux^.palavra_chave = ref_descritor.palavra_chave then
+	    		if aux^.palavra_chave = ref_descritor.palavra_chave_user then
 	    			begin
 	    				ref_descritor.encontrada := True;
 	    				aux2 := aux^.ponteiro_dict;
@@ -500,7 +525,7 @@ begin
     begin                                                         
         i := 0;
         writeln('=====================================================');	;
-        writeln('Lista de Palavras-Chaves vazia. Nada para exibir :( ');
+        writeln('Lista de Palavras-Chaves vazia. Nada para exibir :/ ');
     end
     else
     begin
@@ -599,12 +624,10 @@ Begin
 			descritor.contagem := consultar_palavra_chave(descritor);
 			writeln('Quantidade de Palavras-Chaves: ',descritor.contagem);
 			writeln('=====================================================');	
-			limpa_tela()
+			limpa_tela();
 		end;
-		
 	end;
-		
-End.
+end.
 {// Aqui vão ser inseridas todas, ou as mais importantes, variaveis, assim como uma explicação do que ela faz: 
 -
 -
