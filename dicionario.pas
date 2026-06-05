@@ -32,9 +32,6 @@ Program dicionarioBastos ;
 			tail_PalavrasChaves	: ptLista;
 		 	end;
 {COISAS A FAZER: | PC = Palavra Chave
-- No inserir palavras-chaves temos que implementar isso: Considerando que existe a PC [R] com os verbetes = ([F][I][L][M]), posteriormente criamos a PC 2 [K]. Percebe-se que [F] e [I] são menores que
-[K], logo, devem ser transferidas. Por isso que, quando criamos uma PC ex: [K] que antecede uma outra ex: [R], devemos ir na próxima PC e transferir os itens que são menores que PC 2 [K].
-A notícia boa é que vai estar ordenado então independente da quantidade de valores é só pegar a primeira palavra, percorrer e parar em uma maior, e conectar os dicionários, sem perda de dados.
 - A Engenharia reversa deve ser feita na remoção de PCs tbm, onde vamos remover a PC e a anterior deve receber os Verbetes maiores, os verbetes vão ser inseridos no ultimo nó da PC menor.
 - Na função de escrever todos os dicionários: User seleciona ordem ascendente [A] e decrescente [D], dependendo da escolha, basta iniciar por HEAD (marca início) ou TAIL (marca o último elemento)
 }	 
@@ -293,25 +290,25 @@ begin
 									end
 									else
 										begin
-											 ref_descritor.adicionado := False;
-											 aux3 := aux2;
-											 while (aux3^.prox_dicionario <> nil) and ( aux3^.verbete_PTBR < ref_descritor.palavra_portugues ) do
-											 begin
+											ref_descritor.adicionado := False;
+											aux3 := aux2;
+											while (aux3^.prox_dicionario <> nil) and ( aux3^.verbete_PTBR < ref_descritor.palavra_portugues ) do
+											begin
 											 	aux3:= aux3^.prox_dicionario;
-											 	if aux3^.verbete_PTBR > ref_descritor.palavra_portugues then //verifica as posições a fim de encontrar ANTERIOR(aux2) e POSTERIOR(aux3)
-											 		begin
-											  			node^.verbete_PTBR 		   := ref_descritor.palavra_portugues;
-									  					node^.verbete_ING 		   := ref_descritor.palavra_ingles;
-											  			node^.prox_dicionario 	 := aux3;
-											  			aux2^.prox_dicionario 	 := node;
-											  			ref_descritor.adicionado := True;
-	 									  			  writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.head_PalavrasChaves^.palavra_chave);
-										          limpa_tela();
+											    if aux3^.verbete_PTBR > ref_descritor.palavra_portugues then //verifica as posições a fim de encontrar ANTERIOR(aux2) e POSTERIOR(aux3)
+											 	begin
+											  		node^.verbete_PTBR 		   := ref_descritor.palavra_portugues;
+									  				node^.verbete_ING 		   := ref_descritor.palavra_ingles;
+											  		node^.prox_dicionario 	 := aux3;
+											  		aux2^.prox_dicionario 	 := node;
+											  		ref_descritor.adicionado := True;
+	 									  			 writeln('O verbete: "', ref_descritor.palavra_portugues,'" | "',ref_descritor.palavra_ingles,'" foi adicionado à Palavra-Chave: "', ref_descritor.head_PalavrasChaves^.palavra_chave);
+										            limpa_tela();
 											  	end
-											 	else
-											 		aux2:= aux2^.prox_dicionario;
-											 	end;
-											 if (aux3^.prox_dicionario = nil) and (ref_descritor.adicionado = False) then // caso seja o último elemento
+											    else
+											 	    aux2:= aux2^.prox_dicionario;
+                                            end;
+											if (aux3^.prox_dicionario = nil) and (ref_descritor.adicionado = False) then // caso seja o último elemento
 											 	begin
 											 		  node^.verbete_PTBR 		:= ref_descritor.palavra_portugues;
 									  				node^.verbete_ING 		:= ref_descritor.palavra_ingles;
@@ -551,7 +548,7 @@ Begin
 	while descritor.opcao <> 0 do
 	begin
 		writeln('=====================================================');	
-	  writeln('1 - Incluir Palavra-Chave'); 				      // 1 //FEITO {modificar} 
+	  writeln('1 - Incluir Palavra-Chave'); 				// 1 //FEITO  
 		writeln('2 - Remover Palavra-Chave');               // 7 //
 		writeln('3 - Incluir Verbete no Dicionário');       // 2 //FEITO
 		writeln('4 - Remover Verbete do Dicionário');       // 4 //
@@ -562,7 +559,7 @@ Begin
 		writeln('0 - Sair');
 		writeln('=====================================================');		
 		writeln('Escolha uma das opções a cima: ');
-		read(descritor.opcao);                   
+		readln(descritor.opcao);                   
 		 
 		
 		if descritor.opcao = 1 then // incluir palavra chave 													OK
