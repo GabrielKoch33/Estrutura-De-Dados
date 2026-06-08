@@ -236,59 +236,8 @@ begin
 		end;
 end;
 
-procedure remover_palavra_chave(var ref_descritor: programa);//2
-var aux_doadora, aux_receptora, aux_anterior: ptLista;
-var aux, aux2: ptDict;
+procedure remover_palavra_chave();//2
 begin
-	if ref_descritor.head_PalavrasChaves = nil then
-	begin
-		writeln('Nenhuma Palavra-Chave foi cadastrada! Remoção impedida enquanto não houver Palavras-Chaves');
-		limpa_tela();
-	end
-	else
-	begin
-		aux_doadora:= ref_descritor.head_PalavrasChaves;
-		            
-		if verifca_duplicada_palavra_chave(ref_descritor, aux_doadora) = False then
-			writeln('Essa Palavra-Chave não foi cadastrada ou sua ortografia está incorreta. Tente Novamente')
-		else
-		begin
-		  while aux_doadora^.palavra_chave <> ref_descritor.palavra_chave_user do
-		  	aux_doadora := aux_doadora^.proximo; // aux para exatamente na posição que desejamos
-		  	
-		  aux_anterior:= aux_doadora^.anterior;                     
-		  aux_receptora:= aux_doadora^.proximo;
-		  	
-		  if aux_doadora^.ponteiro_dict = nil then// se não tem nada para transferir então apenas liga os nós
-			  begin
-			  	aux_anterior^.proximo 	:= aux_receptora;
-			  	aux_receptora^.anterior	:= aux_anterior; 
-					writeln('A Palavra-Chave "',aux_doadora^.palavra_chave,'" foi removida!');
-			  	dispose(aux_doadora);
-			  end
-		  else
-		 	  begin
-		 	                                            
-		 	  	aux:=aux_doadora^.ponteiro_dict;
-			  	aux2:= nil;
-			  	while (aux <> nil) do // aux sempre vai para em nill no final das contas
-			  	begin
-			  		aux2 :=aux; // é por isso que aux2 sempre fica um nó atrás, é com ela que iremos linkar
-			  		aux := aux^.prox_dicionario
-			  	end;
-			  	
-			  	aux2^.prox_dicionario				:= aux_receptora^.ponteiro_dict;
-			  	aux_receptora^.ponteiro_dict:= aux_doadora^.ponteiro_dict;
-			  	aux_doadora^.ponteiro_dict	:= nil;
-			  	aux_anterior^.proximo 			:= aux_receptora;
-			  	aux_receptora^.anterior			:= aux_anterior; 
-			  	
-					writeln('A Palavra-Chave "',aux_doadora^.palavra_chave,'" foi removida e os devidos verbetes foram migrados!!');
-			  	dispose(aux_doadora);
-			  	
-		  	end;	
-		end;
-	end;
 end;
 
 procedure incluir_palavra_no_dicionario(var ref_descritor: programa); // a ideia é que ao inserir a palavra o programa já aloque ela na palavra correta automaticamente
@@ -498,9 +447,10 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////
-{function escrever_tudo(ref_descritor);
+function escrever_tudo(ref_descritor: programa): boolean;
 begin
-end;}
+escrever_tudo:= true;
+end;
 ////////////////////////////////////////////////////////////
 function escrever_dicionario_escolhido(ref_descritor: programa): integer;
 var aux: ptLista;
@@ -541,7 +491,7 @@ begin
     	end
     	
     	else // possui mais de um elemento
-    	begin         //^.proximo
+    	begin
 	    	while (aux^.proximo <> nil) and (ref_descritor.encontrada = False) do
 	    	begin // ou esse while encerra pq não existe a PC informada ou encerra pq achou
 	    		if aux^.palavra_chave = ref_descritor.palavra_chave_user then
@@ -567,9 +517,10 @@ end;
 
 
 ////////////////////////////////////////////////////////////
-{function buscar_traducao(ref_descritor);
-begin                                   
-end;                                     }
+function buscar_traducao(ref_descritor: programa): boolean;
+begin      
+buscar_traducao:= true;                             
+end;                                     
 ////////////////////////////////////////////////////////////
 
 function consultar_palavra_chave(ref_descritor: programa): integer;//5
@@ -606,7 +557,7 @@ Begin
 	while descritor.opcao <> 0 do
 	begin
 		writeln('=====================================================');	
-	  writeln('1 - Incluir Palavra-Chave'); 							// 1 //FEITO  
+	  writeln('1 - Incluir Palavra-Chave'); 				// 1 //FEITO  
 		writeln('2 - Remover Palavra-Chave');               // 7 //
 		writeln('3 - Incluir Verbete no Dicionário');       // 2 //FEITO
 		writeln('4 - Remover Verbete do Dicionário');       // 4 //
@@ -633,7 +584,7 @@ Begin
 			limpa_tela();
 			ler_palavra_chave(descritor);
 			limpa_tela();
-		  remover_palavra_chave(descritor);
+		  remover_palavra_chave();
 		end	
 			
 		else if descritor.opcao = 3 then   // incluir no dicionário automáticamente  OK
@@ -647,15 +598,15 @@ Begin
 			limpa_tela();        
 			ler_palavras_pt_ing(descritor);
 			limpa_tela();
-		//remover_palavra_do_dicionario(descritor);
+		  remover_palavra_do_dicionario(descritor);
 		end
 		
 		else if descritor.opcao = 5 then // escrever todos os dicionários
 		begin
-		{	limpa_tela();
-			ler_palavra(descritor);
 			limpa_tela();
-			escrever_tudo(descritor);}                         
+			ler_palavra_chave(descritor);
+			limpa_tela();
+			escrever_tudo(descritor);
 		end
 			
 		else if descritor.opcao = 6 then   // escrever dicionário escolhido pelo usuário
@@ -670,7 +621,7 @@ Begin
 		else if descritor.opcao = 7 then    //  escolher palavra e trazer tradução
 		begin
 			limpa_tela();
-		//buscar_traducao(descritor);
+		  buscar_traducao(descritor);
 		end
 				
 		else if descritor.opcao = 8 then    
