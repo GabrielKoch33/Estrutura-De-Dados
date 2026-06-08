@@ -475,7 +475,6 @@ begin
     				writeln('Não existe dicionário de Verbetes para consultar. Crie Verbetes para a Palavra-Chave: "',ref_descritor.palavra_chave_user,'"')
     			else
     			begin
-						ref_descritor.encontrada := True;
 						i := 1;
 						aux2:= aux^.ponteiro_dict;
 						writeln('=====================================================');	
