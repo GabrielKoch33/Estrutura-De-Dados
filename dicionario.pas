@@ -236,7 +236,9 @@ begin
 		end;
 end;
 
-//procedure remover_palavra_chave()//2
+procedure remover_palavra_chave();//2
+begin
+end;
 
 procedure incluir_palavra_no_dicionario(var ref_descritor: programa); // a ideia é que ao inserir a palavra o programa já aloque ela na palavra correta automaticamente
 var aux: ptLista;
@@ -445,9 +447,10 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////
-{function escrever_tudo(ref_descritor);
+function escrever_tudo(ref_descritor: programa): boolean;
 begin
-end;}
+escrever_tudo:= true;
+end;
 ////////////////////////////////////////////////////////////
 function escrever_dicionario_escolhido(ref_descritor: programa): integer;
 var aux: ptLista;
@@ -514,9 +517,10 @@ end;
 
 
 ////////////////////////////////////////////////////////////
-{function buscar_traducao(ref_descritor);
-begin                                   
-end;                                     }
+function buscar_traducao(ref_descritor: programa): boolean;
+begin      
+buscar_traducao:= true;                             
+end;                                     
 ////////////////////////////////////////////////////////////
 
 function consultar_palavra_chave(ref_descritor: programa): integer;//5
@@ -580,7 +584,7 @@ Begin
 			limpa_tela();
 			ler_palavra_chave(descritor);
 			limpa_tela();
-		//remover_palavra_chave();
+		  remover_palavra_chave();
 		end	
 			
 		else if descritor.opcao = 3 then   // incluir no dicionário automáticamente  OK
@@ -594,15 +598,15 @@ Begin
 			limpa_tela();        
 			ler_palavras_pt_ing(descritor);
 			limpa_tela();
-		//remover_palavra_do_dicionario(descritor);
+		  remover_palavra_do_dicionario(descritor);
 		end
 		
 		else if descritor.opcao = 5 then // escrever todos os dicionários
 		begin
-		{	limpa_tela();
-			ler_palavra(descritor);
 			limpa_tela();
-			escrever_tudo(descritor);}
+			ler_palavra_chave(descritor);
+			limpa_tela();
+			escrever_tudo(descritor);
 		end
 			
 		else if descritor.opcao = 6 then   // escrever dicionário escolhido pelo usuário
@@ -617,7 +621,7 @@ Begin
 		else if descritor.opcao = 7 then    //  escolher palavra e trazer tradução
 		begin
 			limpa_tela();
-		//buscar_traducao(descritor);
+		  buscar_traducao(descritor);
 		end
 				
 		else if descritor.opcao = 8 then    
