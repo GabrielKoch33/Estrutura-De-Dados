@@ -125,6 +125,7 @@ begin
     pc_doadora^.ponteiro_dict := aux3; // conecta o head as palavras que não foram transferidas
 end;
 ////////////////////////////////////////////////////////////
+
 function escreve_itens(ref_aux2: ptDict; ref_i: integer): integer;
 begin                                   
 while ref_aux2^.prox_dicionario <> nil do
@@ -470,13 +471,18 @@ begin
     	begin
     		if aux^.palavra_chave = ref_descritor.palavra_chave_user then  // ele é a palavra informada?
     		begin
-					ref_descritor.encontrada := True;
-					i := 1;
-					aux2:= aux^.ponteiro_dict;
-					writeln('=====================================================');	
-					writeln('Palavra-Chave: ',aux^.palavra_chave);
-					writeln('=====================================================');	
-					escrever_dicionario_escolhido := escreve_itens(aux2, i);
+    			if aux^.ponteiro_dict = nil then
+    				writeln('Não existe dicionário de Verbetes para consultar. Crie Verbetes para a Palavra-Chave: "',ref_descritor.palavra_chave_user,'"')
+    			else
+    			begin
+						ref_descritor.encontrada := True;
+						i := 1;
+						aux2:= aux^.ponteiro_dict;
+						writeln('=====================================================');	
+						writeln('Palavra-Chave: ',aux^.palavra_chave);
+						writeln('=====================================================');	
+						escrever_dicionario_escolhido := escreve_itens(aux2, i);
+					end;
 				end
 				else
 					writeln('Essa Palavra-Chave não foi cadastrada ou sua ortografia está incorreta. Tente Novamente');		
