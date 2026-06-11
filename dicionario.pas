@@ -1,4 +1,22 @@
 Program dicionarioBastos ;
+	{	// loop para encontrar a posição EXATA; 
+		// se AUX = HEAD -> parou no primeiro elemento; AUX = NIL -> não achou elemento; senão AUX = ELEMENTO DESEJADO
+		while (aux <> nil) and (aux^.palavra_chave <> ref_descritor.palavra_chave_user) do
+	    begin 
+	    	aux := aux^.proximo;  // aux para em cima da palavra que queremos
+	    end;
+	}
+	{
+	// loop para percorrer lista encadeada simples
+	// aux3 sempre vai estar uma posição atrás de aux2
+	aux3 := nil;
+	aux2 := aux^.ponteiro_dict //s 
+	while (aux2 <> nil) and (aux2^.verbete_PTBR < ref_descritor.palavra_portugues) do	
+		begin
+			aux3:= aux2;
+			aux2:= aux2^.prox_dicionario;
+		end;
+	}
 
 	    type
         tipo_inf 	= string;
@@ -101,7 +119,6 @@ begin
 		 ref_aux:= ref_aux^.proximo;
 	  end;
    verifca_duplicada_palavra_chave := duplicada;
-   
 end;
 ////////////////////////////////////////////////////////////
 procedure transferir_verbetes( var pc_doadora: ptLista; var node_receptora: ptLista; palavra_split: tipo_inf); 
