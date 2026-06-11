@@ -20,12 +20,12 @@ Program dicionarioBastos ;
     
 	  programa = record
 		 	opcao				: integer;
-		 	palavra_chave_user	: tipo_inf;// palavra que o usuário vai informar
+		 	palavra_chave_user	: tipo_inf;// palavra que o usuário vai informar //também vai ser usada para buscar tradução
 		 	palavra_ingles		: tipo_inf;
 		 	palavra_portugues	: tipo_inf;
 		 	ListaPalavrasChaves : ptLista;//ponteiro principal da lista
-		 	adicionado 			: boolean;
-		 	encontrada			: boolean;//sinceramente essa var nem precisava existir, mas vou criar para tornar "indentificavel" seu uso, mas no lugar dela podia ser qualquer outra booleana
+		 	//adicionado 			: boolean;
+		 	//encontrada			: boolean;//sinceramente essa var nem precisava existir, mas vou criar para tornar "indentificavel" seu uso, mas no lugar dela podia ser qualquer outra booleana
 		 	duplicada 			: boolean;
 		 	contagem 			: integer;
 			head_PalavrasChaves	: ptLista;
@@ -54,7 +54,7 @@ end;
 ////////////////////////////////////////////////////////////
 procedure ler_palavra_chave(var ref_descritor: programa);
 begin
-	writeln('=====================================================');	
+		writeln('=====================================================');	
     writeln('Digite uma Palavra-Chave: ');
     readln(ref_descritor.palavra_chave_user);
     ref_descritor.palavra_chave_user := upcase(ref_descritor.palavra_chave_user);
@@ -223,6 +223,73 @@ end;
 procedure remover_palavra_chave();//2
 begin
 end;
+////////////////////////////////////////////////////////////
+procedure remover_palavra_do_dicionario(var ref_descritor: programa);
+var ref_aux: ptLista;
+var ref_aux2, ref_aux3: ptDict;
+begin
+	writeln('=====================================================');
+	if (ref_descritor.head_PalavrasChaves = nil) then
+	  begin
+		  writeln('Lista de Palavras-Chaves vazia. Nenhum verbete existe para remover :/ '); 
+		  writeln('=====================================================');
+		  limpa_tela();
+	  end
+	  else
+		begin
+			writeln('Qual Verbete você deseja remover?');
+			read(ref_descritor.palavra_chave_user);
+			ref_descritor.palavra_chave_user := upCase(ref_descritor.palavra_chave_user);
+			writeln('=====================================================');
+			
+			ref_aux := ref_descritor.head_PalavrasChaves;
+			while (ref_aux <> nil) and (ref_aux^.palavra_chave < ref_descritor.palavra_chave_user) do
+				ref_aux := ref_aux^.proximo;  // aux vai parar na PC certa
+				
+			if ref_aux = nil then
+			begin 
+				writeln('Não existem Palavras-Chaves para suportar esse Verbete. Considere cadastra-lo ou verifique sua ortografia');
+				writeln('=====================================================');
+				limpa_tela();		
+			end
+			else
+			begin
+				ref_aux3:= nil;
+				ref_aux2:= ref_aux^.ponteiro_dict;
+				
+				while (ref_aux2^.verbete_PTBR <> ref_descritor.palavra_chave_user) and (ref_aux2 <> nil) do
+				begin
+					ref_aux3 := ref_aux2;
+					ref_aux2 := ref_aux2^.prox_dicionario;		
+				end;
+				
+				if ref_aux2 = nil then
+					begin
+						writeln('O Verbete "',ref_descritor.palavra_chave_user,'" não foi encontrado, impossível remover algo inexistênte');
+						writeln('=====================================================');
+						limpa_tela();
+					end
+				else if ref_aux2 = ref_aux^.ponteiro_dict then // se for no primeiro elemento
+					begin
+						ref_aux3 := ref_aux2^.prox_dicionario;
+						ref_aux^.ponteiro_dict := ref_aux3;
+						writeln('Foram removidos os Verbetes: "',ref_aux2^.verbete_PTBR,'" | "',ref_aux2^.verbete_ING,'" da Palavra-Chave: "',ref_aux^.palavra_chave,'"');
+						writeln('=====================================================');
+						dispose(ref_aux2);
+						limpa_tela()
+					end
+				else
+					begin
+						ref_aux3^.prox_dicionario := ref_aux2^.prox_dicionario;
+						ref_aux2^.prox_dicionario := nil;
+						writeln('Foram removidos os Verbetes: "',ref_aux2^.verbete_PTBR,'" | "',ref_aux2^.verbete_ING,'" da Palavra-Chave: "',ref_aux^.palavra_chave,'"');
+						writeln('=====================================================');
+						dispose(ref_aux2);
+						limpa_tela();
+					end;						                                                            	
+			end;	
+		end;
+end;
 ////////////////////////////////////////////////////////////	
 
 procedure incluir_palavra_no_dicionario(var ref_descritor: programa); // a ideia é que ao inserir a palavra o programa já aloque ela na palavra correta automaticamente
@@ -299,17 +366,25 @@ begin
 			  end;
 		end;	  
 end;
-   
-procedure remover_palavra_do_dicionario();
-begin
-end;
-{
-	
-}
 ////////////////////////////////////////////////////////////
 function escrever_tudo(ref_descritor: programa): boolean;
+var ordem: integer;
 begin
-escrever_tudo:= true;
+	repeat
+		writeln('[1] ORDEM CRESCENTE');
+		writeln('[2] ORDEM DECRESCENTE');
+		writeln('[0] SAIR DA FUNÇÃO');
+		readln(ordem);
+		if ordem = 1 then
+			begin
+			end
+		else if ordem = 2 then
+			begin
+			end
+		else if ordem = 0 then
+			writeln('Saindo...');
+		
+	until (ordem = 1 ) or (ordem = 2) or (ordem = 0);
 end;
 ////////////////////////////////////////////////////////////
 function escreve_itens(ref_aux2: ptDict; ref_i: integer): integer;
@@ -371,10 +446,52 @@ begin
 end;   
 ////////////////////////////////////////////////////////////
 function buscar_traducao(ref_descritor: programa): boolean;
+var ref_aux: ptLista;
+var ref_aux2: ptDict;
 begin      
-buscar_traducao:= true;                             
+  if (ref_descritor.head_PalavrasChaves = nil) then
+  begin
+  	writeln('=====================================================');	;
+	  writeln('Lista de Palavras-Chaves vazia. Nada para exibir :/ ');
+	  buscar_traducao:= False;
+	  
+  end
+  else
+	begin
+		writeln('Qual Verbete você deseja encontrar a tradução? ');
+		read(ref_descritor.palavra_chave_user);
+		ref_descritor.palavra_chave_user := upCase(ref_descritor.palavra_chave_user);
+		
+		ref_aux := ref_descritor.head_PalavrasChaves;
+		while (ref_aux <> nil) and (ref_aux^.palavra_chave < ref_descritor.palavra_chave_user) do
+			ref_aux := ref_aux^.proximo;
+			
+		if ref_aux = nil then
+		begin
+			writeln('Não existem Palavras-Chaves para suportar esse Verbete. Considere cadastra-lo ou verifique sua ortografia');
+			buscar_traducao:= False;			
+		end
+		else
+		begin
+			ref_aux2:= ref_aux^.ponteiro_dict;
+			
+			while (ref_aux2^.verbete_PTBR <> ref_descritor.palavra_chave_user) and (ref_aux2 <> nil) do
+				ref_aux2 := ref_aux2^.prox_dicionario;
+			
+			if ref_aux2 = nil then
+			begin
+				writeln('O Verbete "',ref_descritor.palavra_chave_user,'" não foi encontrado, impossível buscar tradução. Verifique se o mesmo foi cadastrado');
+				buscar_traducao:= False;
+			end
+			else
+				begin
+					writeln('A tradução de: "',ref_descritor.palavra_chave_user,'" é: "',ref_aux2^.verbete_ING,'"');
+					buscar_traducao:= True;
+				end;						                                                            	
+		end;	
+	end;	                           
 end;                                     
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////                             
 
 function consultar_palavra_chave(ref_descritor: programa): integer;//5
 var i   : integer;                                            // até que seria legal transformar em função, mas é tão simples esse bloco que nem vale
@@ -409,14 +526,14 @@ Begin
 	while descritor.opcao <> 0 do
 	begin
 		writeln('=====================================================');	
-	  writeln('1 - Incluir Palavra-Chave'); 				// 1 //FEITO  
-		writeln('2 - Remover Palavra-Chave');               // 7 //
-		writeln('3 - Incluir Verbete no Dicionário');       // 2 //FEITO
-		writeln('4 - Remover Verbete do Dicionário');       // 4 //
-		writeln('5 - Escrever Todas as Palavras de Todos os Dicionário'); // 6 {FAZER OPÇÃO CRESCENTE OU DECRESCENTE}
-		writeln('6 - Escrever Dicionário de sua Escolha');  // 3 //FEITO 
-		writeln('7 - Buscar Tradução');                     // 5 // -> pede palavra ptbr -> encontra a pc maior -> acessa -> busca valor -> write palavra ingles
-		writeln('8 - Consultar Palavras-Chaves');           // 0 //FEITO
+	  writeln('1 - Incluir Palavra-Chave'); 														// 1 //FEITO  
+		writeln('2 - Remover Palavra-Chave');       		  								// 7 //   
+		writeln('3 - Incluir Verbete no Dicionário'); 										// 2 //FEITO
+		writeln('4 - Remover Verbete do Dicionário'); 										// 4 //FEITO
+		writeln('5 - Escrever Todas as Palavras de Todos os Dicionário'); // 6 //		{FAZER OPÇÃO CRESCENTE OU DECRESCENTE}
+		writeln('6 - Escrever Dicionário de sua Escolha');  							// 3 //FEITO 
+		writeln('7 - Buscar Tradução');                   							  // 5 //FEITO
+		writeln('8 - Consultar Palavras-Chaves');           							// 0 //FEITO
 		writeln('0 - Sair');
 		writeln('=====================================================');		
 		writeln('Escolha uma das opções a cima: ');
@@ -448,15 +565,11 @@ Begin
 		else if descritor.opcao = 4 then   // remover palavra do dicionário        
 		begin
 			limpa_tela();        
-			ler_palavras_pt_ing(descritor);
-			limpa_tela();
-		  remover_palavra_do_dicionario();
+		  remover_palavra_do_dicionario(descritor);
 		end
 		
 		else if descritor.opcao = 5 then // escrever todos os dicionários
 		begin
-			limpa_tela();
-			ler_palavra_chave(descritor);
 			limpa_tela();
 			escrever_tudo(descritor);
 		end
@@ -473,7 +586,11 @@ Begin
 		else if descritor.opcao = 7 then    //  escolher palavra e trazer tradução
 		begin
 			limpa_tela();
-		  buscar_traducao(descritor);
+		  if buscar_traducao(descritor) then
+		  	writeln(':D ')
+		  else
+		  	writeln(':( ');
+		  limpa_tela();
 		end
 				
 		else if descritor.opcao = 8 then    
