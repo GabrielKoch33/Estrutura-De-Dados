@@ -1,4 +1,5 @@
 Program dicionarioBastos ;
+	// UNICOS LOOPS NECESSÁRIO
 	{	
 	// loop para encontrar a posição EXATA; 
 	// se AUX = HEAD -> parou no primeiro elemento; AUX = NIL -> não achou elemento; senão AUX = ELEMENTO DESEJADO
@@ -43,10 +44,6 @@ Program dicionarioBastos ;
 		 	palavra_chave_user	: tipo_inf;// palavra que o usuário vai informar //também vai ser usada para buscar tradução
 		 	palavra_ingles		: tipo_inf;
 		 	palavra_portugues	: tipo_inf;
-		 	ListaPalavrasChaves : ptLista;//ponteiro principal da lista
-		 	//adicionado 			: boolean;
-		 	//encontrada			: boolean;//sinceramente essa var nem precisava existir, mas vou criar para tornar "indentificavel" seu uso, mas no lugar dela podia ser qualquer outra booleana
-		 	duplicada 			: boolean;
 		 	contagem 			: integer;
 			head_PalavrasChaves	: ptLista;
 			tail_PalavrasChaves	: ptLista;
@@ -276,7 +273,7 @@ begin
 				ref_aux3:= nil;
 				ref_aux2:= ref_aux^.ponteiro_dict;
 				
-				while (ref_aux2^.verbete_PTBR <> ref_descritor.palavra_chave_user) and (ref_aux2 <> nil) do
+				while (ref_aux2 <> nil) and (ref_aux2^.verbete_PTBR <> ref_descritor.palavra_chave_user) do
 				begin
 					ref_aux3 := ref_aux2;
 					ref_aux2 := ref_aux2^.prox_dicionario;		
@@ -388,7 +385,10 @@ end;
 ////////////////////////////////////////////////////////////
 function escrever_tudo(ref_descritor: programa): boolean;
 var ordem: integer;
+var aux: ptLista;
+var aux2: ptDict;
 begin
+	// de preferencia usar o escreve_itens()
 	repeat
 		writeln('[1] ORDEM CRESCENTE');
 		writeln('[2] ORDEM DECRESCENTE');
@@ -396,14 +396,19 @@ begin
 		readln(ordem);
 		if ordem = 1 then
 			begin
+			 //aux vai percorrer as palavras chaves
+			 //aux2 vai percorrer os verbetes
+			 //ref_descritor.contagem := escreve_itens();
+			 //writeln(ref_descritor.contagem() apenas para exibir a quantidade de verbetes, tem que fazer isso devido ao retorno integer da função
 			end
 		else if ordem = 2 then
 			begin
+			//a unica diferença é que aux:=tail e para percorrer o dict ele aux:=aux^.anterior
 			end
 		else if ordem = 0 then
 			writeln('Saindo...');
 		
-	until (ordem = 1 ) or (ordem = 2) or (ordem = 0);
+	until (ordem = 1 ) or (ordem = 2) or (ordem = 0);// se quiser re-ver esse repeat until (não gosto de usar isso)
 end;
 ////////////////////////////////////////////////////////////
 function escreve_itens(ref_aux2: ptDict; ref_i: integer): integer;
@@ -483,7 +488,7 @@ begin
 		
 		ref_aux := ref_descritor.head_PalavrasChaves;
 		while (ref_aux <> nil) and (ref_aux^.palavra_chave < ref_descritor.palavra_chave_user) do
-			ref_aux := ref_aux^.proximo;
+			ref_aux := ref_aux^.proximo;// encontra PC correta, ou não encontra nenhuma
 			
 		if ref_aux = nil then
 		begin
@@ -494,7 +499,7 @@ begin
 		begin
 			ref_aux2:= ref_aux^.ponteiro_dict;
 			
-			while (ref_aux2^.verbete_PTBR <> ref_descritor.palavra_chave_user) and (ref_aux2 <> nil) do
+			while (ref_aux2 <> nil) and (ref_aux2^.verbete_PTBR <> ref_descritor.palavra_chave_user)  do
 				ref_aux2 := ref_aux2^.prox_dicionario;
 			
 			if ref_aux2 = nil then
@@ -513,7 +518,7 @@ end;
 ////////////////////////////////////////////////////////////                             
 
 function consultar_palavra_chave(ref_descritor: programa): integer;//5
-var i   : integer;                                            // até que seria legal transformar em função, mas é tão simples esse bloco que nem vale
+var i   : integer;                                           
 var aux : ptLista;
 begin
     if (ref_descritor.head_PalavrasChaves = nil) then
