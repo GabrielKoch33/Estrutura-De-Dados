@@ -1,8 +1,10 @@
 Program dicionarioBastos ;
-	{	// loop para encontrar a posição EXATA; 
-		// se AUX = HEAD -> parou no primeiro elemento; AUX = NIL -> não achou elemento; senão AUX = ELEMENTO DESEJADO
-		while (aux <> nil) and (aux^.palavra_chave <> ref_descritor.palavra_chave_user) do
-	    begin 
+	{	
+	// loop para encontrar a posição EXATA; 
+	// se AUX = HEAD -> parou no primeiro elemento; AUX = NIL -> não achou elemento; senão AUX = ELEMENTO DESEJADO
+	aux := ref_descritor.head_PalavrasChaves
+	while (aux <> nil) and (aux^.palavra_chave <> ref_descritor.palavra_chave_user) do
+		begin 
 	    	aux := aux^.proximo;  // aux para em cima da palavra que queremos
 	    end;
 	}
