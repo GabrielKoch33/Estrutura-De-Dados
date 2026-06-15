@@ -211,6 +211,8 @@ end;
 
 ////////////////////////////////////////////////////////////					
 procedure remover_palavra_chave(var ref_descritor: programa);//2  ref_descritor.palavra_chave_user
+var aux2: ptDict;
+var aux: ptLista;
 begin
 	if (ref_descritor.head_PalavrasChaves = nil) then
 	begin
@@ -231,25 +233,74 @@ begin
 		
 		else if aux = ref_descritor.head_PalavrasChaves then
 		begin
-			//transfere verbetes head para o prox
-			//head passa a apontar para prox
-			//dispose aux (antigo head)
+			if aux^.ponteiro_dict = nil then
+				begin
+					writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida!');
+					ref_descritor.head_PalavrasChaves := aux^.proximo;
+					dispose(aux);
+					limpa_tela();
+			  end
+			else
+				begin
+					ref_descritor.head_PalavrasChaves := aux^.proximo; //head é transferido para frente
+					aux2 															:= aux^.ponteiro_dict;        // aux2 acessa o dict da PC que vai ser removida
+					
+					while aux2^.prox_dicionario <> nil do
+						aux2:= aux2^.prox_dicionario;    // aux2 vai parar no ultimo elemento
+						
+					aux2^.prox_dicionario 													 := ref_descritor.head_PalavrasChaves^.ponteiro_dict; //liga o ultimo elemento ao dicionario que head esta
+					ref_descritor.head_PalavrasChaves^.ponteiro_dict := aux^.ponteiro_dict;    //dict de head de liga ao dict do anterior, fundindo os dois
+					aux^.ponteiro_dict 															 := nil;
+					writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida e os devidos verbetes foram migrados!');
+					dispose(aux);
+					limpa_tela();
+				end
 		end
 		
 		else if aux = ref_descritor.tail_PalavrasChaves then
 		begin
-			//tail aponta para o anterior
-			//dispose aux (antigo tail)
-		end;
-		
-		else
-		begin
-		  //transfere verbete para o prox
-		  //conecta os nodes
-		  //dipose no escolhido
+			 ref_descritor.tail_PalavrasChaves 					:= aux^.anterior;
+			 ref_descritor.tail_PalavrasChaves^.proximo := nil;
+			 writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida!');
+			 dispose(aux);
+			 limpa_tela();
 		end
-	end;
-	
+		
+		else   // qualquer outro elemento sem ser head e tail
+		begin 
+			if aux^.ponteiro_dict = nil then
+				begin
+					aux^.anterior^.proximo := aux^.proximo;
+					aux^.proximo^.anterior := aux^.anterior;
+					aux^.anterior          := nil;
+					aux^.proximo           := nil;
+					writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida!');
+					dispose(aux);
+					limpa_tela();
+			  end
+			else
+				begin
+				  aux2 := aux^.ponteiro_dict;
+					
+					while aux2^.prox_dicionario <> nil do
+						aux2:= aux2^.prox_dicionario;    // aux2 vai parar no ultimo elemento
+						
+					aux2^.prox_dicionario := aux^.proximo^.ponteiro_dict;
+					aux^.proximo^.ponteiro_dict := aux^.ponteiro_dict;
+					
+					aux^.anterior^.proximo := aux^.proximo;
+					aux^.proximo^.anterior := aux^.anterior;
+					
+					aux^.anterior          := nil;
+					aux^.proximo           := nil;
+					aux^.ponteiro_dict		 := nil;
+					
+					writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida e os devidos verbetes foram migrados!');
+					dispose(aux);
+					limpa_tela();
+				end;
+		end;
+	end;	
 end;
 ////////////////////////////////////////////////////////////
 procedure remover_palavra_do_dicionario(var ref_descritor: programa);
@@ -620,7 +671,7 @@ Begin
 	begin
 		writeln('=====================================================');	
 	  writeln('1 - Incluir Palavra-Chave'); 														// 1 //FEITO  
-		writeln('2 - Remover Palavra-Chave');       		  								// 7 //   
+		writeln('2 - Remover Palavra-Chave');       		  								// 7 //FEITO  
 		writeln('3 - Incluir Verbete no Dicionário'); 										// 2 //FEITO
 		writeln('4 - Remover Verbete do Dicionário'); 										// 4 //FEITO
 		writeln('5 - Escrever Todas as Palavras de Todos os Dicionário'); // 6 //FEITO
@@ -646,7 +697,7 @@ Begin
 			limpa_tela();
 			ler_palavra_chave(descritor);
 			limpa_tela();
-		  remover_palavra_chave();
+		  remover_palavra_chave(descritor);
 		end	
 			
 		else if descritor.opcao = 3 then   // incluir no dicionário automáticamente  OK
