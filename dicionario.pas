@@ -1,26 +1,4 @@
 Program dicionarioBastos ;
-	// UNICOS LOOPS NECESSÁRIO
-	{	
-	// loop para encontrar a posição EXATA; 
-	// se AUX = HEAD -> parou no primeiro elemento; AUX = NIL -> não achou elemento; senão AUX = ELEMENTO DESEJADO
-	aux := ref_descritor.head_PalavrasChaves
-	while (aux <> nil) and (aux^.palavra_chave <> ref_descritor.palavra_chave_user) do
-		begin 
-	    	aux := aux^.proximo;  // aux para em cima da palavra que queremos
-	    end;
-	}
-	{
-	// loop para percorrer lista encadeada simples
-	// aux3 sempre vai estar uma posição atrás de aux2
-	aux3 := nil;
-	aux2 := aux^.ponteiro_dict //s 
-	while (aux2 <> nil) and (aux2^.verbete_PTBR < ref_descritor.palavra_portugues) do	
-		begin
-			aux3:= aux2;
-			aux2:= aux2^.prox_dicionario;
-		end;
-	}
-
 	    type
         tipo_inf 	= string;
         ptLista 	= ^lista;// permite apontar para palavras-chaves anteriores e posteriores
@@ -28,7 +6,7 @@ Program dicionarioBastos ;
   				  
 		lista = record
 			anterior			: ptLista; 
-    		palavra_chave		: tipo_inf;  // CARRO - MELHOR (vamos deixar as palavras chaves em .upper()?)
+    		palavra_chave		: tipo_inf;  
     		ponteiro_dict		: ptDict;
     		proximo				: ptLista;
     		end;
@@ -48,10 +26,7 @@ Program dicionarioBastos ;
 			head_PalavrasChaves	: ptLista;
 			tail_PalavrasChaves	: ptLista;
 		 	end;
-{COISAS A FAZER: | PC = Palavra Chave
-- A Engenharia reversa deve ser feita na remoção de PCs tbm, onde vamos remover a PC e a anterior deve receber os Verbetes maiores, os verbetes vão ser inseridos no ultimo nó da PC menor.
-- Na função de escrever todos os dicionários: User seleciona ordem ascendente [A] e decrescente [D], dependendo da escolha, basta iniciar por HEAD (marca início) ou TAIL (marca o último elemento)
-}	 
+
 var
 	 descritor: programa;
 
@@ -64,7 +39,6 @@ end;
 ////////////////////////////////////////////////////////////	 
 procedure cria_lista_palavras(var ref_descritor: programa);
 begin
-		 ref_descritor.ListaPalavrasChaves	:= nil;
 		 ref_descritor.head_PalavrasChaves	:= nil;
 		 ref_descritor.tail_PalavrasChaves	:= nil;
 end;
@@ -149,7 +123,7 @@ end;
 procedure incluir_palavra_chave(var ref_descritor: programa);
 var node,aux,aux2: ptLista;
 begin
-	new(node);//node é igual a aux nos primeiros códigos, node = nó = estrutura basica do [anterior,dado,dict,prox]
+	new(node);
 	if node = nil then
 		begin
 	 		writeln('Memória Cheia');
@@ -236,8 +210,46 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////					
-procedure remover_palavra_chave();//2
+procedure remover_palavra_chave(var ref_descritor: programa);//2  ref_descritor.palavra_chave_user
 begin
+	if (ref_descritor.head_PalavrasChaves = nil) then
+	begin
+		writeln('Nenhuma Palavra-Chave foi cadastrada! Por favor cadastre Palavras-Chaves para então removê-las');
+		limpa_tela();
+	end
+	else
+	begin
+		aux:= ref_descritor.head_PalavrasChaves;
+		while (aux <> nil) and (aux^.palavra_chave <> ref_descritor.palavra_chave_user) do
+			aux :=  aux^.proximo;
+			
+		if aux = nil then
+		begin
+			writeln('Não existe a Palavra-Chave: "',ref_descritor.palavra_chave_user,'". Cadastre-a ou verifique sua ortografia');
+			limpa_tela(); 
+		end
+		
+		else if aux = ref_descritor.head_PalavrasChaves then
+		begin
+			//transfere verbetes head para o prox
+			//head passa a apontar para prox
+			//dispose aux (antigo head)
+		end
+		
+		else if aux = ref_descritor.tail_PalavrasChaves then
+		begin
+			//tail aponta para o anterior
+			//dispose aux (antigo tail)
+		end;
+		
+		else
+		begin
+		  //transfere verbete para o prox
+		  //conecta os nodes
+		  //dipose no escolhido
+		end
+	end;
+	
 end;
 ////////////////////////////////////////////////////////////
 procedure remover_palavra_do_dicionario(var ref_descritor: programa);
@@ -336,7 +348,7 @@ begin
 					else
 					begin
 						aux:= ref_descritor.head_PalavrasChaves;
-						while (aux^.proximo <> nil) and (aux^.palavra_chave < ref_descritor.palavra_portugues)  do 
+						  while (aux^.proximo <> nil) and (aux^.palavra_chave < ref_descritor.palavra_portugues)  do 
 							begin 	
 								aux := aux^.proximo; // aux é setado na PC correta
 							end;
@@ -383,36 +395,10 @@ begin
 		end;	  
 end;
 ////////////////////////////////////////////////////////////
-function escrever_tudo(ref_descritor: programa): boolean;
-var ordem: integer;
-var aux: ptLista;
-var aux2: ptDict;
-begin
-	// de preferencia usar o escreve_itens()
-	repeat
-		writeln('[1] ORDEM CRESCENTE');
-		writeln('[2] ORDEM DECRESCENTE');
-		writeln('[0] SAIR DA FUNÇÃO');
-		readln(ordem);
-		if ordem = 1 then
-			begin
-			 //aux vai percorrer as palavras chaves
-			 //aux2 vai percorrer os verbetes
-			 //ref_descritor.contagem := escreve_itens();
-			 //writeln(ref_descritor.contagem() apenas para exibir a quantidade de verbetes, tem que fazer isso devido ao retorno integer da função
-			end
-		else if ordem = 2 then
-			begin
-			//a unica diferença é que aux:=tail e para percorrer o dict ele aux:=aux^.anterior
-			end
-		else if ordem = 0 then
-			writeln('Saindo...');
-		
-	until (ordem = 1 ) or (ordem = 2) or (ordem = 0);// se quiser re-ver esse repeat until (não gosto de usar isso)
-end;
-////////////////////////////////////////////////////////////
-function escreve_itens(ref_aux2: ptDict; ref_i: integer): integer;
-begin                                   
+function escreve_itens(ref_aux2: ptDict): integer;
+var ref_i: integer;
+begin   
+ref_i := 1;                                
 while ref_aux2^.prox_dicionario <> nil do
 	  begin
 	     writeln(ref_i,' - Português: ', ref_aux2^.verbete_PTBR,' | Inglês: ',ref_aux2^.verbete_ING);    
@@ -422,6 +408,89 @@ while ref_aux2^.prox_dicionario <> nil do
 	  writeln(ref_i,' - Português: ', ref_aux2^.verbete_PTBR,' | Inglês: ',ref_aux2^.verbete_ING);
 	  writeln('=====================================================');	
 	  escreve_itens := ref_i;
+end;
+////////////////////////////////////////////////////////////
+function escrever_todos_os_dicionarios(ref_descritor: programa): integer;
+var ordem, totVerbetes: integer;
+var aux: ptLista;
+var aux2: ptDict;
+begin
+	totVerbetes:= 0;
+	limpa_tela();
+	
+	if ref_descritor.head_PalavrasChaves = nil then
+	begin
+			writeln('=====================================================');	
+			writeln('Lista de Palavras-Chaves vazia. Nada para exibir :( ');
+			writeln('=====================================================');	
+	end
+	
+	else
+	begin
+		repeat
+			writeln('[1] ORDEM CRESCENTE');
+			writeln('[2] ORDEM DECRESCENTE');
+			writeln('[0] SAIR DA FUNÇÃO');
+			readln(ordem);
+		until (ordem = 1 ) or (ordem = 2) or (ordem = 0);// se quiser re-ver esse repeat until (não gosto de usar isso)
+		
+		 limpa_tela();
+		 if ordem = 1 then
+				begin
+					aux:= ref_descritor.head_PalavrasChaves;
+					while aux <> nil do
+					begin
+						writeln('Palavra-Chave atual: "',aux^.palavra_chave,'"');
+						if aux^.ponteiro_dict = nil then
+						begin
+							writeln('Nada para exibir, indo para o próximo elemento');
+							readkey;
+						end
+						else
+						begin
+							aux2:= aux^.ponteiro_dict;
+							ref_descritor.contagem := escreve_itens(aux2);
+							totVerbetes := totVerbetes +  ref_descritor.contagem;
+							readkey;
+						end;
+					aux:= aux^.proximo;
+					end;
+					escrever_todos_os_dicionarios := totVerbetes;
+				end
+				
+			else if ordem = 2 then
+				begin
+				  aux:= ref_descritor.tail_PalavrasChaves;
+					while aux <> nil do
+					begin
+						writeln('Palavra-Chave atual: "',aux^.palavra_chave,'"');
+						if aux^.ponteiro_dict = nil then
+						begin
+							writeln('Nada para exibir, indo para o próximo elemento');
+							readkey;
+						end
+						else
+						begin
+							aux2:= aux^.ponteiro_dict;
+							ref_descritor.contagem := escreve_itens(aux2);
+							totVerbetes := totVerbetes +  ref_descritor.contagem;
+							readkey;
+							
+						end;
+					 aux:= aux^.anterior;
+				  end;
+				  escrever_todos_os_dicionarios := totVerbetes;  
+			  end
+				
+			else if ordem = 0 then
+			begin
+				limpa_tela();
+				ref_descritor.contagem := 0;
+				totVerbetes := ref_descritor.contagem;
+				writeln('Saindo...');
+				limpa_tela();
+			end;
+	end;
 end;
 ////////////////////////////////////////////////////////////
 function escrever_dicionario_escolhido(ref_descritor: programa): integer;
@@ -463,7 +532,7 @@ begin
 						writeln('Palavra-Chave: ',aux^.palavra_chave);
 						writeln('=====================================================');
 						i := 1;
-	    			escrever_dicionario_escolhido := escreve_itens(aux2, i);
+	    			escrever_dicionario_escolhido := escreve_itens(aux2);
 	    		end
 	    	end;
 	 end;
@@ -554,7 +623,7 @@ Begin
 		writeln('2 - Remover Palavra-Chave');       		  								// 7 //   
 		writeln('3 - Incluir Verbete no Dicionário'); 										// 2 //FEITO
 		writeln('4 - Remover Verbete do Dicionário'); 										// 4 //FEITO
-		writeln('5 - Escrever Todas as Palavras de Todos os Dicionário'); // 6 //		{FAZER OPÇÃO CRESCENTE OU DECRESCENTE}
+		writeln('5 - Escrever Todas as Palavras de Todos os Dicionário'); // 6 //FEITO
 		writeln('6 - Escrever Dicionário de sua Escolha');  							// 3 //FEITO 
 		writeln('7 - Buscar Tradução');                   							  // 5 //FEITO
 		writeln('8 - Consultar Palavras-Chaves');           							// 0 //FEITO
@@ -594,8 +663,10 @@ Begin
 		
 		else if descritor.opcao = 5 then // escrever todos os dicionários
 		begin
-			limpa_tela();
-			escrever_tudo(descritor);
+			descritor.contagem := escrever_todos_os_dicionarios(descritor);
+			writeln('Total de verbetes visualizados/existêntes:',descritor.contagem);
+			writeln('=====================================================');
+			limpa_tela()	 
 		end
 			
 		else if descritor.opcao = 6 then   // escrever dicionário escolhido pelo usuário
@@ -627,13 +698,3 @@ Begin
 		end;
 	end;
 end.
-{// Aqui vão ser inseridas todas, ou as mais importantes, variaveis, assim como uma explicação do que ela faz: 
--
--
-//}
-{
-//O protótipo deve ter as opções: incluir a palavra-chave, incluir no dicionário, remover do dicionário, consultar, escrever todo dicionário//
--O programa deve permitir cadastrar PALAVRAS-CHAVES (PC)
--Ao criar uma palavra-chave nova intermediária de duas já existêntes (ex: [D]-*[G]*-[M]), teremos que transferir as possíveis palavras D < G < M para que estão em [M] para [G]
-
-}
