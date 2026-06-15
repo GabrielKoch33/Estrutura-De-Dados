@@ -219,6 +219,7 @@ begin
 		writeln('Nenhuma Palavra-Chave foi cadastrada! Por favor cadastre Palavras-Chaves para então removê-las');
 		limpa_tela();
 	end
+	
 	else
 	begin
 		aux:= ref_descritor.head_PalavrasChaves;
@@ -235,8 +236,9 @@ begin
 		begin
 			if aux^.ponteiro_dict = nil then
 				begin
-					writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida!');
 					ref_descritor.head_PalavrasChaves := aux^.proximo;
+  				ref_descritor.head_PalavrasChaves^.anterior := nil;	
+  				writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida!');
 					dispose(aux);
 					limpa_tela();
 			  end
@@ -251,7 +253,11 @@ begin
 					aux2^.prox_dicionario 													 := ref_descritor.head_PalavrasChaves^.ponteiro_dict; //liga o ultimo elemento ao dicionario que head esta
 					ref_descritor.head_PalavrasChaves^.ponteiro_dict := aux^.ponteiro_dict;    //dict de head de liga ao dict do anterior, fundindo os dois
 					aux^.ponteiro_dict 															 := nil;
-					writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida e os devidos verbetes foram migrados!');
+					
+					if ref_descritor.head_PalavrasChaves^.proximo = nil then
+						writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida! Os verbetes associados foram descartados devido a não haver migração apta!');
+					else
+						writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida e os devidos verbetes foram migrados!');
 					dispose(aux);
 					limpa_tela();
 				end
@@ -261,7 +267,7 @@ begin
 		begin
 			 ref_descritor.tail_PalavrasChaves 					:= aux^.anterior;
 			 ref_descritor.tail_PalavrasChaves^.proximo := nil;
-			 writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida!');
+			 writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida! Os verbetes associados foram descartados devido a não haver migração apta.');
 			 dispose(aux);
 			 limpa_tela();
 		end
