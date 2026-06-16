@@ -255,7 +255,7 @@ begin
 					aux^.ponteiro_dict 															 := nil;
 					
 					if ref_descritor.head_PalavrasChaves^.proximo = nil then
-						writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida! Os verbetes associados foram descartados devido a não haver migração apta!');
+						writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida! Os verbetes associados foram descartados devido a não haver migração apta!')
 					else
 						writeln('A Palavra-Chave "',aux^.palavra_chave,'" foi removida e os devidos verbetes foram migrados!');
 					dispose(aux);
@@ -391,7 +391,7 @@ begin
 			ler_palavras_pt_ing(ref_descritor);
 			if (ref_descritor.tail_PalavrasChaves^.palavra_chave < ref_descritor.palavra_portugues) then  
 			begin//se estivermos na última posição e ainda sim o último elemento for uma Palavra Chave menor que a que queremos incluir, então não existe palavras chaves compativel
-				writeln('Não existe palavra-chave para suportar este Verbete, crie uma nova Palavra-Chave maior que ',ref_descritor.tail_PalavrasChaves^.palavra_chave);
+				writeln('Não existe palavra-chave para suportar este Verbete, crie uma nova Palavra-Chave maior que "',ref_descritor.palavra_portugues,'"');
 				limpa_tela();
 			end		
 			else // Se for possível adicionar o verbete, então esse else ocorre
